@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Logo123</title>
+  <link rel="icon" type="image/x-icon" href="Logo123.ico">
+  <style>
+    body {
+      background-image: url('./Logo 123.png');
+      background-size: cover;
+      background-repeat: repeat;
+    }
+  </style>
+  <script>
+    function downloadFiles() {
+      // First file (CityTheme.pptx)
+      var cityThemeDataUrl = "./City Theme Pt. 1.pptx";
+      var cityThemeLink = document.createElement("a");
+      cityThemeLink.href = cityThemeDataUrl;
+      cityThemeLink.download = "/City Theme Pt. 2.pptx";
+      document.body.appendChild(cityThemeLink);
+      cityThemeLink.click();
+      document.body.removeChild(cityThemeLink);
+
+      // Second file (AnotherTheme.pptx)
+      var anotherThemeDataUrl = "./City Theme Pt. 2.pptx";
+      var anotherThemeLink = document.createElement("a");
+      anotherThemeLink.href = anotherThemeDataUrl;
+      anotherThemeLink.download = "CityTheme.pptx";
+      document.body.appendChild(anotherThemeLink);
+      anotherThemeLink.click();
+      document.body.removeChild(anotherThemeLink);
+    }
+  </script>
+</head>
+
+<body>
+  <h1><marquee>Welcome to Logo123</marquee></h1>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./aboutus.html">About Us</a>
+    <a href="./submission.html">Themes</a>
+    <a href="./instructions.html">Instructions</a>
+    <a href="./contactus.html">Contact Us</a>
+  </nav>
+
+  <div id="section2">
+    <h2>Submission</h2>
+    <p>Click <button onclick="downloadFiles()">here</button> to download the City Theme.</p>
+  </div>
+</body>
+
+</html>
