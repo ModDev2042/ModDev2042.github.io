@@ -13,20 +13,20 @@
   </style>
   <script>
     function downloadFiles() {
-      // First file (CityTheme.pptx)
+      // First file
       var cityThemeDataUrl = "./City Theme Pt. 1.pptx";
       var cityThemeLink = document.createElement("a");
       cityThemeLink.href = cityThemeDataUrl;
-      cityThemeLink.download = "/City Theme Pt. 2.pptx";
+      cityThemeLink.download = "City Theme Pt. 1.pptx";
       document.body.appendChild(cityThemeLink);
       cityThemeLink.click();
       document.body.removeChild(cityThemeLink);
 
-      // Second file (AnotherTheme.pptx)
+      // Second file
       var anotherThemeDataUrl = "./City Theme Pt. 2.pptx";
       var anotherThemeLink = document.createElement("a");
       anotherThemeLink.href = anotherThemeDataUrl;
-      anotherThemeLink.download = "CityTheme.pptx";
+      anotherThemeLink.download = "City Theme Pt. 2.pptx";
       document.body.appendChild(anotherThemeLink);
       anotherThemeLink.click();
       document.body.removeChild(anotherThemeLink);
