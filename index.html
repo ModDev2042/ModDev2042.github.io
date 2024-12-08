@@ -3,42 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mainm</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Afarhadifar Projects</title>
+    <link rel="icon" href="main.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: url('m.jpg') no-repeat center center fixed;
-            background-size: cover; /* Makes sure the image covers the entire viewport */
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
+            background: #f7f8fa;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #fff; /* White text color for contrast */
-            text-align: center;
+            height: 100vh;
+            flex-direction: column;
         }
-        .content {
-            background: rgba(0, 0, 0, 0.5); /* Slightly transparent background */
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 80%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+
         h1 {
-            margin: 0;
-            font-size: 3em;
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 40px;
         }
-        p {
-            margin-top: 10px;
-            font-size: 1.2em;
+
+        .button-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .button {
+            background: linear-gradient(45deg, #6e7dff, #3a49df);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            text-align: center;
+            width: 200px;
+            min-height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Ensures title and description stack vertically */
+            gap: 5px; /* Adds spacing between the title and description */
+        }
+
+        .button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:focus {
+            outline: none;
+        }
+
+        .button:link, .button:visited {
+            color: white;
+            text-decoration: none;
+        }
+
+        .button div {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .button small {
+            font-size: 0.9rem;
+            font-weight: 400;
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <h1>MAINM</h1>
-        <p>Join at play.mainm.net</p>
+    <h1>Afarhadifar Projects</h1>
+    <div class="button-container">
+        <a href="http://html1.com" target="_blank" class="button">
+            <div>The File Hub</div>
+            <small>A hub for everything you could possibly want to do with files.</small>
+        </a>
+        <a href="http://html2.com" target="_blank" class="button">
+            <div>Sorting Algorithms</div>
+            <small>A website that has every single known sorting algorithm.</small>
+        </a>
+        <a href="http://html3.com" target="_blank" class="button">
+            <div>Coming Soon</div>
+            <small>Be patient.</small>
+        </a>
     </div>
 </body>
 </html>
