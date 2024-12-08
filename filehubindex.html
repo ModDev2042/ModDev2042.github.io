@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The File Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            font-family: 'DM Sans', sans-serif;
+            align-items: center; /* Centering title and buttons */
+        }
+        h1 {
+            margin: 20px 0; /* Margin for spacing */
+            font-size: 2.5em; /* Adjust font size as needed */
+            color: black; /* Black text color */
+        }
+        .button {
+            width: 200px;
+            height: 60px;
+            border-radius: 15px;
+            border: 2px dashed #0000FF; /* Matching dotted border */
+            font-size: 1.2em;
+            color: black; /* Button text color */
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .converter {
+            background-color: #87CEEB; /* Lighter blue for converter button */
+        }
+        .modelviewer {
+            background-color: #FF69B4; /* Light pink */
+            border-color: #FF1493; /* Darker pink border */
+        }
+        .audioplayer {
+            background-color: #90EE90; /* Light pink */
+            border-color: #008000; /* Darker pink border */
+            
+        }
+        .videoplayer {
+            background-color: #FFDBBB; /* Light pink */
+            border-color: #FF8C00; /* Darker pink border */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>The File Hub</h1> <!-- Title added here -->
+    
+    <button class="button converter" onclick="window.location.href='converter.html'">Converter</button>
+    <button class="button modelviewer" onclick="window.location.href='modelviewer.html'">3D Model Editor</button>
+    <button class="button audioplayer" onclick="window.location.href='audioplayer.html'">Audio Editor</button>
+    <button class="button videoplayer" onclick="window.location.href='videoplayer.html'">Video Editor</button>
+
+</body>
+</html>
