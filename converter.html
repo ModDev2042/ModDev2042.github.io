@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="ico.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: white;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .blue-rectangle {
+            width: 90vw;
+            height: 200px;
+            background-color: #87CEEB;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 20px;
+            color: black;
+            border: 2px dashed #0000FF;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .blue-rectangle.dragover {
+            background-color: #add8e6;
+        }
+        .dropdowns {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        select {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 5px;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        .to-text {
+            font-size: 20px;
+            color: black;
+        }
+        .convert-button {
+            width: 200px;
+            height: 60px;
+            background-color: #87CEEB;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 20px;
+            color: black;
+            border: 2px dashed #0000FF;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+            display: none;
+        }
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="convert-button" id="convertButton">
+        Convert
+    </div>
+
+    <div class="blue-rectangle" id="dropzone">
+        Drag a file here or click to select
+    </div>
+    <input type="file" id="fileInput">
+
+    <div class="dropdowns">
+        <select id="categoryDropdown">
+            <option value="image">Image</option>
+            <option value="archive">Archive</option>
+            <option value="audio">Audio</option>
+            <option value="cad">CAD</option>
+            <option value="document">Document</option>
+            <option value="ebook">eBook</option>
+            <option value="font">Font</option>
+            <option value="other">Other</option>
+            <option value="presentation">Presentation</option>
+            <option value="spreadsheet">Spreadsheet</option>
+            <option value="vector">Vector</option>
+            <option value="video">Video</option>
+        </select>
+
+        <select id="formatDropdown1"></select>
+
+        <span class="to-text">to</span>
+
+        <select id="formatDropdown2"></select>
+    </div>
+
+    <div class="error-message" id="errorMessage">Error: Check file and format selections.</div>
+
+    <script>
+        const formatOptions = {
+            image: [
+                'png', 'jpeg', 'jpg', 'gif', 'bmp', 'tiff', 'webp', 'heic', 'avif', 'ico', 'psd', 'eps', 'pdf', 'svg', 
+                'raw', 'cr2', 'nef', 'arw', 'jxr', 'jp2', 'dng', 'orf', 'raf', 'rw2', 'sr2', 'ai', 'hdr', 'exr', 'tga', 
+                '3fr', 'fff', 'mef', 'pef', 'srw', 'x3f', 'indd', 'eps', 'xpm', 'fh', 'ai', 'sketch', 'cpt', 'pbm', 
+                'pgm', 'ppm', 'exr', 'dcm', 'svgz', 'ico', 'cur', 'tiff', 'jp2', 'avif', 'bat', 'gif', 'jfif', 'ras', 
+                'pcx', 'fpx', 'wdp', 'jbg', 'jpe', 'jpf', 'tiff', 'wdp', 'wdp', 'rle', 'cgm', 'wmf', 'emf', 'cgm', 
+                'art', 'clp', 'svg', 'drw', 'art', 'dxf'
+            ],
+            archive: [
+                'zip', 'tar', '7z', 'rar', 'gz', 'bz2', 'xz', 'iso', 'dmg', 'lz', 'lzma', 'cab', 'cpio', 'z', 'arj', 
+                'sit', 'sitx', 'ace', 'uha', 'arc', 'alz', 'pkg', 'deb', 'rpm', 'img', 'tgz', 'tar.gz', 'zipx', 'eaz', 
+                'lzip', 'zpaq', 'zip', 'tar.lz', 'zst', 'cab', 'cpgz', 'pax', 'qpress'
+            ],
+            audio: [
+                'mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a', 'alac', 'aiff', 'pcm', 'voc', 'au', 'amr', 'mid', 
+                'midi', 'ra', 'vqf', 'opus', 'ac3', 'dts', 'cda', 'mka', 'asf', 'act', 'm4p', 'mpc', 'ape', 'vqf', 
+                'aif', 'mod', 'xm', 'it', 'spx', 'dss', 'ds2', 'wv', 'mp3pro', 'tta', 's3m', 'cda', 'dls', 'aax', 
+                'wpl', 'xmf', 'm4b', 'paf', 'qcp', 'mogg', 'ra', 'au', 'alac', 'swa', 'kdm', 'sd2', 'synth', 'snd', 
+                'sp', 'kmp', 'mp3', 'mp4a'
+            ],
+            cad: [
+                'dwg', 'dxf', 'stl', '3ds', 'step', 'iges', 'obj', 'sldprt', 'sat', 'prt', 'skp', 'catpart', 'fbx', 
+                'dwf', 'jt', 'x_t', 'x_b', 'cgr', '3dm', 'dgn', 'x_t', '3dxml', 'sldasm', 'prt', 'stp', 'ifc', 
+                'idw', 'ipn', 'igs', 'esw', 'nwd'
+            ],
+            document: [
+                'doc', 'docx', 'odt', 'pdf', 'rtf', 'txt', 'xml', 'wpd', 'tex', 'csv', 'md', 'json', 'html', 'xhtml', 
+                'log', 'asc', 'pages', 'sdw', 'texinfo', 'bib', 'dvi', 'rst', 'dot', 'dotx', 'wps', 'dotm', 'epub', 
+                'wp', 'xml', 'json', 'txt', 'word', 'markdown'
+            ],
+            ebook: [
+                'epub', 'mobi', 'azw3', 'fb2', 'lit', 'lrf', 'prc', 'pdb', 'azw', 'ibooks', 'opf', 'snb', 'pdf', 
+                'txt', 'html', 'rtf', 'docx', 'epub3', 'kfx', 'azw4', 'lrf', 'txt', 'pdb'
+            ],
+            font: [
+                'ttf', 'otf', 'woff', 'woff2', 'fnt', 'pfb', 'pfm', 'afm', 'bdf', 'pcf', 'fon', 'eot', 'suit', 'sfd', 
+                'ttc', 'svg', 'pfa', 'pfb', 'shx', 'bmap', 'vfb', 'bmap', 'ttf', 'otf', 'woff', 'woff2', 'bdf', 
+                'fnt', 'sfd'
+            ],
+            other: [
+                'exe', 'bin', 'apk', 'app', 'dmg', 'msi', 'iso', 'deb', 'rpm', 'json', 'xml', 'bat', 'sh', 'ps', 
+                'rb', 'pl', 'html', 'csv', 'sql', 'jar', 'class', 'py', 'r', 'c', 'cpp', 'h', 'go', 'swift', 'vb', 
+                'lua', 'scala', 'pl', 'pas', 'dtd', 'css', 'scss', 'less', 'hbs'
+            ],
+            presentation: [
+                'ppt', 'pptx', 'odp', 'key', 'sxi', 'pps', 'ppsx', 'dpp', 'pot', 'potx', 'sxi', 'pdf', 'pdf', 
+                'impress', 'prezi', 'pptm', 'xml', 'otp'
+            ],
+            spreadsheet: [
+                'xls', 'xlsx', 'ods', 'csv', 'tsv', 'numbers', 'dbf', 'dif', 'slk', 'xlsb', 'prn', 'xlsxm', 
+                'xml', 'tsv', 'xls', 'fods', '3ds', 'db', 'sxc'
+            ],
+            vector: [
+                'svg', 'eps', 'ai', 'dxf', 'pdf', 'cgm', 'wmf', 'emf', 'fh', 'sketch', 'plt', 'svgz', 
+                'svg', 'dxf', 'fh', 'svg', 'eps', 'ai', 'pdf', 'dxf', 'cdr', 'eps', 'ai'
+            ],
+            video: [
+                'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'mpg', 'mpeg', '3gp', 'ogv', 
+                'qt', 'rm', 'rmvb', 'f4v', 'vob', 'nsv', 'm2ts', 'ts', 'asf', 'drc', 'h264', 'h265', 
+                'hevc', 'divx', 'xvid', 'mts', 'mpv', 'yuv', 'dvr-ms', 'x264', 'x265', 'mxf', 
+                'bink', 'vp8', 'vp9', 'mp2', 'mpe', 'svi'
+            ]
+        };
+
+        const categoryDropdown = document.getElementById('categoryDropdown');
+        const formatDropdown1 = document.getElementById('formatDropdown1');
+        const formatDropdown2 = document.getElementById('formatDropdown2');
+
+        function populateFormats() {
+            const selectedCategory = categoryDropdown.value;
+
+            formatDropdown1.innerHTML = '';
+            formatDropdown2.innerHTML = '';
+
+            formatOptions[selectedCategory].forEach(format => {
+                const option1 = document.createElement('option');
+                option1.value = format;
+                option1.textContent = format.toUpperCase();
+                formatDropdown1.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = format;
+                option2.textContent = format.toUpperCase();
+                formatDropdown2.appendChild(option2);
+            });
+        }
+
+        categoryDropdown.addEventListener('change', populateFormats);
+        populateFormats(); // Initial population
+
+        let selectedFile = null;
+        let newFileName = '';
+        let newFileData = '';
+
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const errorMessage = document.getElementById('errorMessage');
+
+        dropzone.addEventListener('dragover', (e) => handleDragEvents(e));
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => handleDropEvents(e));
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+        function handleDragEvents(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('dragover');
+        }
+
+        function handleDropEvents(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        }
+
+        function handleFile(file) {
+            selectedFile = file;
+            dropzone.textContent = `Selected file: ${file.name}`;
+            errorMessage.style.display = 'none';
+        }
+
+        const convertButton = document.getElementById('convertButton');
+        convertButton.addEventListener('click', () => {
+            const formatFrom = formatDropdown1.value;
+            const formatTo = formatDropdown2.value;
+            const selectedCategory = categoryDropdown.value;
+
+            if (!selectedFile) {
+                showError('No file selected.');
+                return;
+            }
+
+            const fileExtension = selectedFile.name.split('.').pop().toLowerCase();
+
+            if (formatFrom === formatTo) {
+                showError('Cannot convert to the same file type.');
+                return;
+            }
+
+            if (!formatOptions[selectedCategory].includes(fileExtension)) {
+                showError('File does not match selected format.');
+                return;
+            }
+
+            performConversion(selectedFile, formatFrom, formatTo);
+        });
+
+        function showError(message) {
+            errorMessage.textContent = `Error: ${message}`;
+            errorMessage.style.display = 'block';
+        }
+
+        function performConversion(file, formatFrom, formatTo) {
+    const newFileName = file.name.replace(`.${formatFrom}`, `.${formatTo}`);
+
+    // Use FileReader to read the file as a binary string or ArrayBuffer
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const fileData = event.target.result;
+
+        // Create a Blob from the file data and new file format (this example assumes conversion happens server-side or via some other method)
+        const newFileData = new Blob([fileData], { type: file.type });
+
+        // Create a URL for the new file
+        const newFileUrl = URL.createObjectURL(newFileData);
+
+        dropzone.textContent = `${newFileName} (Click to download)`;
+        dropzone.addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = newFileUrl;
+            a.download = newFileName;
+            a.click();
+        });
+
+        errorMessage.style.display = 'none';
+    };
+
+    // Read the file as a binary string (or ArrayBuffer if necessary for specific file types)
+    reader.readAsArrayBuffer(file);
+}
+
+
+        function downloadNewFile() {
+            const blob = new Blob([newFileData], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = newFileName;
+            link.click();
+        }
+    </script>
+
+</body>
+</html>
