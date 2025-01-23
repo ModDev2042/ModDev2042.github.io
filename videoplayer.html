@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            font-family: 'DM Sans', sans-serif;
+            align-items: center; /* Centering elements */
+        }
+        h1 {
+            margin: 20px 0; /* Margin for spacing */
+            font-size: 2.5em; /* Adjust font size as needed */
+            color: black; /* Black text color */
+        }
+        .dropzone {
+            width: 80%;
+            height: 200px;
+            background-color: #FFDBBB; /* Light pink background */
+            border: 2px dotted #FF8C00; /* Dotted border */
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: black; /* White text */
+            margin: 20px auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .dropzone.dragover {
+            background-color: #FFDBBB; /* Darker pink on drag over */
+            border-color: #FF8C00; /* Change border color on drag over */
+        }
+        video {
+            margin-top: 20px;
+            display: none; /* Initially hidden */
+            width: 80%; /* Width of video player */
+            border-radius: 15px; /* Rounded corners for video player */
+        }
+        #fileInfo {
+            margin-top: 10px;
+            font-size: 18px;
+            color: black; /* Black text color */
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="dropzone" id="dropzone">
+        Drag & drop your MP4 file here or click to upload
+    </div>
+    <div id="fileInfo"></div>
+    <video id="videoPlayer" controls></video>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInfo = document.getElementById('fileInfo');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        dropzone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'video/mp4';
+            input.onchange = (e) => {
+                handleFile(e.target.files[0]);
+            };
+            input.click();
+        });
+
+        function handleFile(file) {
+            if (file.type !== 'video/mp4') {
+                alert('Please upload a valid MP4 file.');
+                return;
+            }
+            const url = URL.createObjectURL(file);
+            videoPlayer.src = url;
+            videoPlayer.style.display = 'block'; // Show video player
+            fileInfo.textContent = `Selected file: ${file.name}`;
+            videoPlayer.play(); // Automatically play the video
+        }
+    </script>
+
+</body>
+</html>
