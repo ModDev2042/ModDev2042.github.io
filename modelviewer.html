@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .dropzone {
+            width: 80%;
+            height: 200px;
+            background-color: #FF69B4; /* Light pink background */
+            border: 2px dotted #FF1493; /* Pink dotted border */
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: black; /* White text */
+            margin: 20px auto;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .dropzone.dragover {
+            background-color: #FF85C4; /* Lighter pink on drag over */
+            border-color: #FF69B4; /* Change border color on drag over */
+        }
+        #fileInfo {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+        }
+        #viewer {
+            width: 100%;
+            height: 80vh;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dropzone" class="dropzone">
+        Drag & drop your STL file here or click to upload
+    </div>
+    <input type="file" id="fileInput" accept=".stl" style="display: none;">
+    <div id="fileInfo"></div>
+    <div id="viewer"></div>
+
+    <!-- Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const viewer = document.getElementById('viewer');
+
+        let scene, camera, renderer, controls;
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight * 0.8);
+            viewer.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            camera.position.z = 5;
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            scene.add(directionalLight);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        dropzone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            handleFile(file);
+        });
+
+        function handleFile(file) {
+            if (file && file.name.endsWith('.stl')) {
+                fileInfo.textContent = `Selected file: ${file.name}`;
+                loadSTL(file);
+            } else {
+                fileInfo.textContent = 'Error: Please upload a valid STL file.';
+            }
+        }
+
+        function loadSTL(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const contents = event.target.result;
+                const loader = new THREE.STLLoader();
+                const geometry = loader.parse(contents);
+                const material = new THREE.MeshStandardMaterial({ color: 0xff5533 });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+
+                // Center the model
+                const box = new THREE.Box3().setFromObject(mesh);
+                const center = box.getCenter(new THREE.Vector3());
+                mesh.position.x = -center.x;
+                mesh.position.y = -center.y;
+
+                // Adjust camera position
+                camera.position.z = box.getSize(new THREE.Vector3()).length() * 1.5;
+                controls.target.copy(center);
+                controls.update();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        init();
+    </script>
+
+</body>
+</html>
