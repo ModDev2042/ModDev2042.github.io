@@ -49,6 +49,14 @@
             color: black; /* Black text color */
             text-align: center;
         }
+        #errorMessage {
+            display: none;
+            color: red;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
         .back-button {
             position: absolute;
             top: 20px;
@@ -74,6 +82,11 @@
     <!-- Back button styled in green -->
     <a href="filehubindex.html" class="back-button">Back</a>
 
+    <!-- Error Message -->
+    <div id="errorMessage">
+        Please upload a valid MP3 file.
+    </div>
+
     <!-- Dropzone moved down -->
     <div class="dropzone" id="dropzone">
         Drag & drop your MP3 file here or click to upload
@@ -85,6 +98,7 @@
         const dropzone = document.getElementById('dropzone');
         const fileInfo = document.getElementById('fileInfo');
         const audioPlayer = document.getElementById('audioPlayer');
+        const errorMessage = document.getElementById('errorMessage');
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -107,7 +121,7 @@
         dropzone.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
-            input.accept = 'audio/mp3';
+            input.accept = 'audio/*'; // Accept any audio file
             input.onchange = (e) => {
                 handleFile(e.target.files[0]);
             };
@@ -115,10 +129,16 @@
         });
 
         function handleFile(file) {
-            if (file.type !== 'audio/mpeg') {
-                alert('Please upload a valid MP3 file.');
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            if (fileExtension !== 'mp3') {
+                errorMessage.style.display = 'block'; // Show error message
+                fileInfo.textContent = ''; // Clear file info
+                audioPlayer.style.display = 'none'; // Hide audio player
                 return;
             }
+
+            errorMessage.style.display = 'none'; // Hide error message
             const url = URL.createObjectURL(file);
             audioPlayer.src = url;
             audioPlayer.style.display = 'block'; // Show audio player
