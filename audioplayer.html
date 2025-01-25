@@ -31,7 +31,7 @@
             align-items: center;
             text-align: center;
             color: black; /* Black text */
-            margin: 20px auto;
+            margin: 80px auto; /* Adjusted margin to move it lower */
             transition: background-color 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
         }
@@ -60,18 +60,20 @@
             height: 60px;
             font-size: 1.2em;
             color: black; /* Black text */
-            text-align: center;
-            line-height: 60px; /* Vertically center text */
-            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <!-- Back button styled as requested -->
+    <!-- Back button styled exactly like the converter buttons -->
     <a href="filehubindex.html" class="back">Back</a>
 
+    <!-- Dropzone moved down -->
     <div class="dropzone" id="dropzone">
         Drag & drop your MP3 file here or click to upload
     </div>
