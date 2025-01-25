@@ -73,31 +73,13 @@
             margin-top: 10px;
             display: none;
         }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 150px;
-            height: 50px;
-            background-color: #87CEEB; /* Light green */
-            border-radius: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 18px;
-            color: black; /* Black text */
-            border: 2px dashed #0000FF; /* Green dashed border */
-            cursor: pointer;
-            text-decoration: none;
         input[type="file"] {
             display: none;
         }
     </style>
 </head>
 <body>
-    <a href="filehubindex.html" class="back-button">Back</a>
-    
+
     <div class="convert-button" id="convertButton">
         Convert
     </div>
@@ -254,7 +236,7 @@
 
         function handleFile(file) {
             selectedFile = file;
-            dropzone.textContent = Selected file: ${file.name};
+            dropzone.textContent = `Selected file: ${file.name}`;
             errorMessage.style.display = 'none';
         }
 
@@ -285,12 +267,12 @@
         });
 
         function showError(message) {
-            errorMessage.textContent = Error: ${message};
+            errorMessage.textContent = `Error: ${message}`;
             errorMessage.style.display = 'block';
         }
 
         function performConversion(file, formatFrom, formatTo) {
-    const newFileName = file.name.replace(.${formatFrom}, .${formatTo});
+    const newFileName = file.name.replace(`.${formatFrom}`, `.${formatTo}`);
 
     // Use FileReader to read the file as a binary string or ArrayBuffer
     const reader = new FileReader();
@@ -304,7 +286,7 @@
         // Create a URL for the new file
         const newFileUrl = URL.createObjectURL(newFileData);
 
-        dropzone.textContent = ${newFileName} (Click to download);
+        dropzone.textContent = `${newFileName} (Click to download)`;
         dropzone.addEventListener('click', () => {
             const a = document.createElement('a');
             a.href = newFileUrl;
