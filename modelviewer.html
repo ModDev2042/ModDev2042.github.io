@@ -16,7 +16,7 @@
         }
         .dropzone {
             width: 80%;
-            height: 300px; /* Increased height */
+            height: 400px; /* Increased height */
             background-color: #FF69B4; /* Light pink background */
             border: 2px dotted #FF1493; /* Pink dotted border */
             border-radius: 15px;
@@ -24,8 +24,8 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            color: black; /* White text */
-            margin: 80px auto 20px; /* Adjust margin to move dropzone down */
+            color: black; /* Black text color */
+            margin: 20px auto;
             transition: background-color 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
         }
@@ -43,41 +43,24 @@
             width: 100%;
             height: 80vh;
         }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 150px;
-            height: 50px;
-            background-color: #FF69B4; /* Light pink color */
-            border-radius: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 18px;
-            color: black;
-            border: 2px dashed #FF1493; /* Darker pink border */
-            cursor: pointer;
-            text-decoration: none;
-        }
     </style>
 </head>
 <body>
 
-    <a href="filehubindex.html" class="back-button">Back</a>
-
     <div id="dropzone" class="dropzone">
-        Drag & drop your STL file here or click to upload
+        Drag & drop your 3D model file here or click to upload
     </div>
-    <input type="file" id="fileInput" accept=".stl" style="display: none;">
+    <input type="file" id="fileInput" style="display: none;">
     <div id="fileInfo"></div>
     <div id="viewer"></div>
 
     <!-- Three.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/3MFLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/PLYLoader.js"></script>
+    <script src="https://cdn.rawgit.com/mrdoob/three.js/r128/examples/js/loaders/FBXLoader.js"></script>
 
     <script>
         const dropzone = document.getElementById('dropzone');
@@ -138,36 +121,93 @@
         });
 
         function handleFile(file) {
-            if (file && file.name.endsWith('.stl')) {
+            if (file) {
                 fileInfo.textContent = `Selected file: ${file.name}`;
-                loadSTL(file);
-            } else {
-                fileInfo.textContent = 'Error: Please upload a valid STL file.';
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                
+                if (fileExtension === 'stl') {
+                    loadSTL(file);
+                } else if (fileExtension === 'obj') {
+                    loadOBJ(file);
+                } else if (fileExtension === '3mf') {
+                    load3MF(file);
+                } else if (fileExtension === 'ply') {
+                    loadPLY(file);
+                } else if (fileExtension === 'fbx') {
+                    loadFBX(file);
+                } else {
+                    fileInfo.textContent = 'Error: Unsupported file type.';
+                }
             }
         }
 
         function loadSTL(file) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                const contents = event.target.result;
                 const loader = new THREE.STLLoader();
-                const geometry = loader.parse(contents);
+                const geometry = loader.parse(event.target.result);
                 const material = new THREE.MeshStandardMaterial({ color: 0xff5533 });
                 const mesh = new THREE.Mesh(geometry, material);
                 scene.add(mesh);
-
-                // Center the model
-                const box = new THREE.Box3().setFromObject(mesh);
-                const center = box.getCenter(new THREE.Vector3());
-                mesh.position.x = -center.x;
-                mesh.position.y = -center.y;
-
-                // Adjust camera position
-                camera.position.z = box.getSize(new THREE.Vector3()).length() * 1.5;
-                controls.target.copy(center);
-                controls.update();
+                centerAndResizeCamera(mesh);
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function loadOBJ(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const loader = new THREE.OBJLoader();
+                const object = loader.parse(event.target.result);
+                scene.add(object);
+                centerAndResizeCamera(object);
+            };
+            reader.readAsText(file);
+        }
+
+        function load3MF(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const loader = new THREE.ThreeMFLoader();
+                const object = loader.parse(event.target.result);
+                scene.add(object);
+                centerAndResizeCamera(object);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadPLY(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const loader = new THREE.PLYLoader();
+                const geometry = loader.parse(event.target.result);
+                const material = new THREE.MeshStandardMaterial({ color: 0xff5533 });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+                centerAndResizeCamera(mesh);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadFBX(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const loader = new THREE.FBXLoader();
+                const object = loader.parse(event.target.result);
+                scene.add(object);
+                centerAndResizeCamera(object);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function centerAndResizeCamera(object) {
+            const box = new THREE.Box3().setFromObject(object);
+            const center = box.getCenter(new THREE.Vector3());
+            object.position.x = -center.x;
+            object.position.y = -center.y;
+            camera.position.z = box.getSize(new THREE.Vector3()).length() * 1.5;
+            controls.target.copy(center);
+            controls.update();
         }
 
         init();
