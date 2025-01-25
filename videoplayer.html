@@ -70,12 +70,26 @@
             cursor: pointer;
             text-decoration: none;
         }
+        /* Error message styles */
+        #errorMessage {
+            display: none;
+            color: red;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
     <!-- Back Button -->
     <a href="filehubindex.html" class="back-button">Back</a>
+
+    <!-- Error message -->
+    <div id="errorMessage">
+        Please use our converter to switch your file to MP4 format.
+    </div>
 
     <div class="dropzone" id="dropzone">
         Drag & drop your MP4 file here or click to upload
@@ -87,6 +101,7 @@
         const dropzone = document.getElementById('dropzone');
         const fileInfo = document.getElementById('fileInfo');
         const videoPlayer = document.getElementById('videoPlayer');
+        const errorMessage = document.getElementById('errorMessage');
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -118,9 +133,12 @@
 
         function handleFile(file) {
             if (file.type !== 'video/mp4') {
-                alert('Please upload a valid MP4 file.');
+                errorMessage.style.display = 'block'; // Show error message
+                fileInfo.textContent = ''; // Clear file info
+                videoPlayer.style.display = 'none'; // Hide video player
                 return;
             }
+            errorMessage.style.display = 'none'; // Hide error message if valid file
             const url = URL.createObjectURL(file);
             videoPlayer.src = url;
             videoPlayer.style.display = 'block'; // Show video player
