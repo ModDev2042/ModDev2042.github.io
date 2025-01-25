@@ -50,8 +50,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column; /* Ensures title and description stack vertically */
-            gap: 5px; /* Adds spacing between the title and description */
+            flex-direction: column;
+            gap: 5px;
         }
 
         .button:hover {
@@ -82,9 +82,17 @@
             font-size: 0.9rem;
             font-weight: 400;
         }
+
+        img {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            margin-bottom: 20px; /* Adds space below the image */
+        }
     </style>
 </head>
 <body>
+    <img src="f.png" alt="F Image">
     <h1>Afarhadifar Projects</h1>
     <div class="button-container">
         <a href="./filehubindex.html" class="button">
