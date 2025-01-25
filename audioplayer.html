@@ -121,7 +121,7 @@
         dropzone.addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
-            input.accept = 'audio/*'; // Accept any audio file
+            input.accept = '*/*'; // Accept any audio file
             input.onchange = (e) => {
                 handleFile(e.target.files[0]);
             };
