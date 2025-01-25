@@ -255,7 +255,7 @@
 
         function handleFile(file) {
             selectedFile = file;
-            dropzone.textContent = `Selected file: ${file.name}`;
+            dropzone.textContent = Selected file: ${file.name};
             errorMessage.style.display = 'none';
         }
 
@@ -286,12 +286,12 @@
         });
 
         function showError(message) {
-            errorMessage.textContent = `Error: ${message}`;
+            errorMessage.textContent = Error: ${message};
             errorMessage.style.display = 'block';
         }
 
         function performConversion(file, formatFrom, formatTo) {
-    const newFileName = file.name.replace(`.${formatFrom}`, `.${formatTo}`);
+    const newFileName = file.name.replace(.${formatFrom}, .${formatTo});
 
     // Use FileReader to read the file as a binary string or ArrayBuffer
     const reader = new FileReader();
@@ -305,7 +305,7 @@
         // Create a URL for the new file
         const newFileUrl = URL.createObjectURL(newFileData);
 
-        dropzone.textContent = `${newFileName} (Click to download)`;
+        dropzone.textContent = ${newFileName} (Click to download);
         dropzone.addEventListener('click', () => {
             const a = document.createElement('a');
             a.href = newFileUrl;
