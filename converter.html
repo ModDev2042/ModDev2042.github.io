@@ -324,7 +324,7 @@
         // Create a URL for the new file
         const newFileUrl = URL.createObjectURL(newFileData);
 
-        dropzone.textContent = ${newFileName} (Click to download);
+        dropzone.textContent = `${newFileName} (Click to download)`;
         dropzone.addEventListener('click', () => {
             const a = document.createElement('a');
             a.href = newFileUrl;
