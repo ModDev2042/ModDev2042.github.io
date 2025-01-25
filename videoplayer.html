@@ -51,10 +51,31 @@
             color: black; /* Black text color */
             text-align: center;
         }
+        /* Back Button Styles */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            height: 50px;
+            background-color: #FF8C00; /* Button color matching the dropzone */
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18px;
+            color: black;
+            border: 2px dashed #FF4500; /* Darker orange border */
+            cursor: pointer;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Back Button -->
+    <a href="filehubindex.html" class="back-button">Back</a>
 
     <div class="dropzone" id="dropzone">
         Drag & drop your MP4 file here or click to upload
