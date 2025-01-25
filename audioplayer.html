@@ -31,7 +31,7 @@
             align-items: center;
             text-align: center;
             color: black; /* Black text */
-            margin: 80px auto; /* Adjusted margin to move it lower */
+            margin: 100px auto; /* Adjusted margin to move it lower */
             transition: background-color 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
         }
@@ -49,29 +49,30 @@
             color: black; /* Black text color */
             text-align: center;
         }
-        .back {
-            background-color: #90EE90; /* Light green background */
-            border: 2px dashed #008000; /* Green dashed border */
-            border-radius: 15px;
+        .back-button {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 200px;
-            height: 60px;
-            font-size: 1.2em;
-            color: black; /* Black text */
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            height: 50px;
+            background-color: #87CEEB;
+            border-radius: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
-            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18px;
+            color: black;
+            border: 2px dashed #0000FF;
             cursor: pointer;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- Back button styled exactly like the converter buttons -->
-    <a href="filehubindex.html" class="back">Back</a>
+    <!-- Back button styled based on your example -->
+    <a href="filehubindex.html" class="back-button">Back</a>
 
     <!-- Dropzone moved down -->
     <div class="dropzone" id="dropzone">
