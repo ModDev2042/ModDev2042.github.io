@@ -310,7 +310,7 @@
         }
 
         function performConversion(file, formatFrom, formatTo) {
-    const newFileName = file.name.replace(.${formatFrom}, .${formatTo});
+    const newFileName = file.name.replace(`.${formatFrom}`, `.${formatTo}`);
 
     // Use FileReader to read the file as a binary string or ArrayBuffer
     const reader = new FileReader();
