@@ -24,7 +24,7 @@
             width: 200px;
             height: 60px;
             border-radius: 15px;
-            border: 2px dashed #0000FF; /* Matching dotted border */
+            border: 2px dashed #0000FF; /* Matching dashed border */
             font-size: 1.2em;
             color: black; /* Button text color */
             cursor: pointer;
@@ -41,7 +41,6 @@
         .audioplayer {
             background-color: #90EE90; /* Light pink */
             border-color: #008000; /* Darker pink border */
-
         }
         .videoplayer {
             background-color: #FFDBBB; /* Light pink */
@@ -50,10 +49,15 @@
         .back {
             background-color: #CEA2FD; /* Light pink */
             border-color: #3E2F34; /* Darker pink border */
+            position: absolute; /* Positioning it absolutely */
+            top: 10px; /* Distance from the top */
+            left: 10px; /* Distance from the left */
         }
     </style>
 </head>
 <body>
+
+    <button class="button back" onclick="window.location.href='index.html'">Back</button>
 
     <h1>The File Hub</h1> <!-- Title added here -->
 
@@ -61,7 +65,6 @@
     <button class="button modelviewer" onclick="window.location.href='modelviewer.html'">3D Model Editor</button>
     <button class="button audioplayer" onclick="window.location.href='audioplayer.html'">Audio Editor</button>
     <button class="button videoplayer" onclick="window.location.href='videoplayer.html'">Video Editor</button>
-    <button class="button back" onclick="window.location.href='index.html'">Back</button>
 
 </body>
 </html>
