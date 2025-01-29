@@ -12,7 +12,6 @@
       position: relative;
       height: 100vh;
       background-color: #f0f0f0;
-      cursor: none; /* Hide the default cursor */
       font-family: 'Lexend', sans-serif;
     }
     canvas {
@@ -47,7 +46,6 @@
       opacity: 1;
     }
     .caught-message {
-      font-family: 'Lexend', sans-serif;
       font-size: 48px;
       color: yellow;
       text-align: center;
@@ -71,7 +69,6 @@
       opacity: 1;
     }
     .next-button {
-      font-family: 'Lexend', sans-serif;
       font-size: 24px;
       background-color: #ffcc00;
       color: #fff;
@@ -80,45 +77,17 @@
       border-radius: 10px;
       cursor: pointer;
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       opacity: 0;
-      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transition: opacity 0.5s ease-in-out;
     }
     .next-button:hover {
       background-color: #ff9900;
     }
     .next-button.visible {
       opacity: 1;
-      transform: translateY(-20px) translateX(-10px); /* Slide towards the top-right */
-    }
-
-    .poke-ball-selector {
-      position: absolute;
-      top: 80px;
-      left: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .arrow-button {
-      font-size: 24px;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .arrow-button:hover {
-      background: rgba(255, 255, 255, 1);
-    }
-
-    .poke-ball-img {
-      width: 50px;
-      height: 50px;
-      transition: opacity 0.5s ease-in-out; /* Smooth transition */
+      top: calc(50% + 60px); /* Position below caught message */
     }
   </style>
 </head>
@@ -126,13 +95,6 @@
   <div class="upload-container" id="upload-container">
     <label for="image-upload">Upload an image:</label>
     <input type="file" id="image-upload" accept="image/*">
-  </div>
-
-  <!-- Poké Ball Selector -->
-  <div class="poke-ball-selector">
-    <button class="arrow-button" id="prev-ball">←</button>
-    <img id="poke-ball-img" class="poke-ball-img" src="p1.png" alt="Poké Ball">
-    <button class="arrow-button" id="next-ball">→</button>
   </div>
 
   <canvas id="canvas"></canvas>
@@ -147,13 +109,6 @@
     const caughtMessage = document.getElementById('caught-message');
     const uploadContainer = document.getElementById('upload-container');
     const nextButton = document.getElementById('next-button');
-    const pokeBallImg = document.getElementById('poke-ball-img');
-    const prevBallButton = document.getElementById('prev-ball');
-    const nextBallButton = document.getElementById('next-ball');
-    const pokeBallNames = ['p1', 'p2', 'p3', 'p4', 'p5']; // Poké Ball image names
-    let currentPokeBallIndex = 0; // Track the selected Poké Ball
-    let pokeBall = new Image();
-    pokeBall.src = `${pokeBallNames[currentPokeBallIndex]}.png`; // Initial Poké Ball image
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -210,79 +165,17 @@
       const mouseX = event.clientX - rect.left;
       const mouseY = event.clientY - rect.top;
 
-      const ballSize = 50;
-      const duration = 1000; // 1 second
-      const peakHeight = 200; // How high the arc goes
+      fadeElement.classList.add('active');
 
-      let startTime;
-      const startX = canvas.width / 2 - ballSize / 2;
-      const startY = canvas.height - ballSize;
-
-      const animate = (timestamp) => {
-        if (!startTime) startTime = timestamp;
-        const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1); // Clamp progress to 1
-
-        // Quadratic easing for smooth arc motion
-        const x = startX + (mouseX - startX) * progress;
-        const y =
-          startY +
-          (mouseY - startY) * progress -
-          peakHeight * (1 - Math.pow(2 * progress - 1, 2)); // Arc equation
-
-        // Rotation logic
-        const rotation = progress * Math.PI * 4; // Full rotations during the throw
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-        drawImageScaled(uploadedImage, canvas, ctx); // Redraw scaled image
-
-        // Draw rotating Poké Ball
-        ctx.save();
-        ctx.translate(x + ballSize / 2, y + ballSize / 2);
-        ctx.rotate(rotation);
-        ctx.drawImage(pokeBall, -ballSize / 2, -ballSize / 2, ballSize, ballSize);
-        ctx.restore();
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          fadeElement.classList.add('active'); // Fade to white at the end
-          setTimeout(() => {
-            caughtMessage.textContent = `You caught a wild ${wildName}!`;
-            caughtMessage.classList.add('visible');
-            nextButton.classList.add('visible'); // Show next button with animation
-          }, 1000);
-        }
-      };
-
-      requestAnimationFrame(animate);
+      setTimeout(() => {
+        caughtMessage.textContent = `You caught a wild ${wildName}!`;
+        caughtMessage.classList.add('visible');
+        nextButton.classList.add('visible');
+      }, 1000);
     });
 
-    // Handle next Poké Ball selection
-    function changePokeBall(index) {
-      const previousIndex = currentPokeBallIndex;
-      currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length; // Wrap around
-      if (currentPokeBallIndex !== previousIndex) {
-        pokeBall.src = `${pokeBallNames[currentPokeBallIndex]}.png`;
-        pokeBallImg.style.opacity = 0; // Start fade-out
-        setTimeout(() => {
-          pokeBallImg.src = pokeBall.src; // Update image source
-          pokeBallImg.style.opacity = 1; // Start fade-in
-        }, 500);
-      }
-    }
-
-    prevBallButton.addEventListener('click', () => {
-      changePokeBall(currentPokeBallIndex - 1); // Previous Poké Ball
-    });
-
-    nextBallButton.addEventListener('click', () => {
-      changePokeBall(currentPokeBallIndex + 1); // Next Poké Ball
-    });
-
-    // "Next" button functionality
     nextButton.addEventListener('click', () => {
-      location.reload(); // Reloads the page to restart
+      location.reload();
     });
   </script>
 </body>
