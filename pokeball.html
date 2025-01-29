@@ -170,7 +170,7 @@
       tempCanvas.height = 1;
       tempCtx.drawImage(img, 0, 0, 1, 1);
       const pixel = tempCtx.getImageData(0, 0, 1, 1).data;
-      return rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]});
+      return `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
     }
 
     document.getElementById('image-upload').addEventListener('change', (event) => {
@@ -254,7 +254,7 @@
         } else {
           fadeElement.classList.add('active'); // Fade to white at the end
           setTimeout(() => {
-            caughtMessage.textContent = You caught a wild ${wildName}!;
+            caughtMessage.textContent = `You caught a wild ${wildName}!`;
             caughtMessage.classList.add('visible');
             nextButton.classList.add('visible'); // Show next button with animation
           }, 1000);
@@ -269,7 +269,7 @@
       const previousIndex = currentPokeBallIndex;
       currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length; // Wrap around
       if (currentPokeBallIndex !== previousIndex) {
-        pokeBall.src = ${pokeBallNames[currentPokeBallIndex]}.png;
+        pokeBall.src = `${pokeBallNames[currentPokeBallIndex]}.png`;
         pokeBallImg.style.opacity = 0; // Start fade-out
         setTimeout(() => {
           pokeBallImg.src = pokeBall.src; // Update image source
