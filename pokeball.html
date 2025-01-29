@@ -180,10 +180,17 @@
         reader.onload = (e) => {
           uploadedImage.src = e.target.result;
           uploadedImage.onload = () => {
+            console.log('Image successfully loaded.');
             uploadedImageReady = true;
             backgroundColor = getAverageColor(uploadedImage);
             document.body.style.backgroundColor = backgroundColor;
-            wildName = prompt("Enter the name of the wild Pokémon:");
+    
+            // Prompt for the Pokémon name
+            console.log('Prompting for Pokémon name...');
+            wildName = prompt("Enter the name of the wild Pokémon:"); // Check if this executes
+            if (!wildName) wildName = "Mystery Pokémon"; // Handle cancel or empty input
+            console.log('Wild Pokémon name:', wildName);
+    
             uploadContainer.classList.add('hidden');
             drawImageScaled(uploadedImage, canvas, ctx);
           };
