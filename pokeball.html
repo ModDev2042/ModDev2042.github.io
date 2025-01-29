@@ -268,15 +268,19 @@
     function changePokeBall(index) {
       const previousIndex = currentPokeBallIndex;
       currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length; // Wrap around
+    
       if (currentPokeBallIndex !== previousIndex) {
-        pokeBall.src = `${pokeBallNames[currentPokeBallIndex]}.png`;
+        const newSrc = `${pokeBallNames[currentPokeBallIndex]}.png`;
+    
         pokeBallImg.style.opacity = 0; // Start fade-out
         setTimeout(() => {
-          pokeBallImg.src = pokeBall.src; // Update image source
+          pokeBallImg.src = newSrc; // Update displayed image
+          pokeBall.src = newSrc; // Update the Poké Ball image used in animation
           pokeBallImg.style.opacity = 1; // Start fade-in
-        }, 500);
+        }, 300);
       }
     }
+
 
     prevBallButton.addEventListener('click', () => {
       changePokeBall(currentPokeBallIndex - 1); // Previous Poké Ball
