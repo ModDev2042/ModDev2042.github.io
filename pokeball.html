@@ -275,20 +275,27 @@
 
     // Handle next Poké Ball selection
     function changePokeBall(index) {
+      console.log('Changing Poké Ball...');
+    
       const previousIndex = currentPokeBallIndex;
       currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length; // Wrap around
     
       if (currentPokeBallIndex !== previousIndex) {
         const newSrc = `${pokeBallNames[currentPokeBallIndex]}.png`;
     
-        pokeBallImg.style.opacity = 0; // Start fade-out
+        console.log(`New Poké Ball: ${newSrc}`); // Debugging log
+    
+        // First, set fade-out effect
+        pokeBallImg.style.opacity = 0;
+    
         setTimeout(() => {
-          pokeBallImg.src = newSrc; // Update displayed image
-          pokeBall.src = newSrc; // Update the Poké Ball image used in animation
-          pokeBallImg.style.opacity = 1; // Start fade-in
+          pokeBallImg.src = newSrc; // Update the displayed image in the selector
+          pokeBall.src = newSrc; // Update the Poké Ball image used in animations
+          pokeBallImg.style.opacity = 1; // Fade-in effect
         }, 300);
       }
     }
+
 
 
     prevBallButton.addEventListener('click', () => {
