@@ -208,6 +208,15 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, img.width, img.height, centerX, centerY, img.width * ratio, img.height * ratio);
     }
+    prevBallButton.addEventListener('click', () => {
+      console.log('Previous button clicked');
+      changePokeBall(currentPokeBallIndex - 1);
+    });
+    
+    nextBallButton.addEventListener('click', () => {
+      console.log('Next button clicked');
+      changePokeBall(currentPokeBallIndex + 1);
+    });
 
     canvas.addEventListener('click', (event) => {
       if (!uploadedImageReady) return;
