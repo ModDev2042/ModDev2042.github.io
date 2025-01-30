@@ -9,6 +9,7 @@
       font-family: Arial, sans-serif;
       text-align: center;
       background-color: #f3f3f3;
+      position: relative;
     }
     .beta {
       position: absolute;
@@ -18,73 +19,82 @@
       font-size: 1.2em;
       font-weight: bold;
     }
-    #pokemon-container {
+    .pokemon-container {
       margin-top: 50px;
-    }
-    .pokeball-button {
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #ff0000;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .pokeball-button:hover {
-      background-color: #cc0000;
     }
     #message {
       font-size: 1.5em;
       margin-top: 20px;
       color: #333;
     }
+    .arrows {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .arrow-button {
+      margin: 0 10px;
+      font-size: 1.5em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .arrow-button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
   <div class="beta">BETA</div>
 
-  <div id="pokemon-container">
+  <div class="pokemon-container">
     <h1>Choose a Pokémon</h1>
-    <select id="pokemon-select">
-      <option value="Pikachu">Pikachu</option>
-      <option value="Charmander">Charmander</option>
-      <option value="Bulbasaur">Bulbasaur</option>
-      <option value="Squirtle">Squirtle</option>
-    </select>
+    <h2 id="pokemon-name">Pikachu</h2>
+    <div class="arrows">
+      <button class="arrow-button" id="left-arrow">&larr;</button>
+      <button class="arrow-button" id="right-arrow">&rarr;</button>
+    </div>
     <button id="spot-button">Spot Pokémon</button>
     <div id="message"></div>
   </div>
 
-  <div id="pokeball-container" style="display:none;">
-    <h2>Select a Poké Ball:</h2>
-    <button class="pokeball-button" id="p1">Poké Ball</button>
-    <button class="pokeball-button" id="p2">Great Ball</button>
-    <button class="pokeball-button" id="p3">Ultra Ball</button>
-    <div id="ball-message"></div>
-  </div>
-
   <script>
-    const pokemonSelect = document.getElementById('pokemon-select');
-    const spotButton = document.getElementById('spot-button');
-    const message = document.getElementById('message');
-    const pokeballContainer = document.getElementById('pokeball-container');
-    const ballMessage = document.getElementById('ball-message');
+    const pokemonList = ["Pikachu", "Charmander", "Bulbasaur", "Squirtle"];
+    let currentIndex = 0;
 
-    // Event listener for spotting Pokémon
-    spotButton.addEventListener('click', () => {
-      const pokemonName = pokemonSelect.value;
-      message.textContent = `A wild ${pokemonName} has been spotted on the horizon!`;
-      pokeballContainer.style.display = 'block';
-      ballMessage.textContent = ''; // Clear previous ball messages
+    const pokemonName = document.getElementById("pokemon-name");
+    const message = document.getElementById("message");
+    const leftArrow = document.getElementById("left-arrow");
+    const rightArrow = document.getElementById("right-arrow");
+    const spotButton = document.getElementById("spot-button");
+
+    // Update Pokémon name based on the index
+    function updatePokemonName() {
+      pokemonName.textContent = pokemonList[currentIndex];
+    }
+
+    // Left arrow click
+    leftArrow.addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + pokemonList.length) % pokemonList.length;
+      updatePokemonName();
     });
 
-    // Event listeners for Poké Ball buttons
-    document.querySelectorAll('.pokeball-button').forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const ballType = event.target.textContent;
-        ballMessage.textContent = `You chose the ${ballType}!`;
-      });
+    // Right arrow click
+    rightArrow.addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % pokemonList.length;
+      updatePokemonName();
     });
+
+    // Spot Pokémon button click
+    spotButton.addEventListener("click", () => {
+      message.textContent = `A wild ${pokemonList[currentIndex]} has been spotted on the horizon!`;
+    });
+
+    // Initial Pokémon name setup
+    updatePokemonName();
   </script>
 </body>
 </html>
