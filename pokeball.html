@@ -11,7 +11,7 @@
       overflow: hidden;
       position: relative;
       height: 100vh;
-      background-color: #f0f0f0; /* Hide the default cursor */
+      background-color: #f0f0f0; 
       font-family: 'Lexend', sans-serif;
     }
     canvas {
@@ -89,7 +89,7 @@
     }
     .next-button.visible {
       opacity: 1;
-      transform: translateY(-20px) translateX(-10px); /* Slide towards the top-right */
+      transform: translateY(-20px) translateX(-10px); 
     }
 
     .poke-ball-selector {
@@ -117,19 +117,40 @@
     .poke-ball-img {
       width: 50px;
       height: 50px;
-      transition: opacity 0.5s ease-in-out; /* Smooth transition */
+      transition: opacity 0.5s ease-in-out;
     }
 
     .beta-label {
       position: fixed;
       top: 10px;
       right: 10px;
-      background-color: #8aff80; /* Light green */
+      background-color: #8aff80; 
       padding: 5px 10px;
       font-size: 18px;
       color: #333;
       border-radius: 5px;
       z-index: 1000;
+    }
+
+    .wild-message {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Lexend', sans-serif;
+      font-size: 36px;
+      color: yellow;
+      opacity: 0;
+      text-align: center;
+      text-shadow: 
+        -2px -2px 0 blue,
+        2px -2px 0 blue,
+        -2px 2px 0 blue,
+        2px 2px 0 blue;
+      transition: opacity 1s ease-in-out;
+    }
+    .wild-message.visible {
+      opacity: 1;
     }
   </style>
 </head>
@@ -150,9 +171,12 @@
   <div class="fade-to-white" id="fade"></div>
   <div class="caught-message" id="caught-message"></div>
   <button class="next-button" id="next-button">Next</button>
-  
+
   <!-- Beta Label -->
   <div class="beta-label">Beta</div>
+
+  <!-- Wild Pokémon Message -->
+  <div class="wild-message" id="wild-message"></div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -195,21 +219,18 @@
         reader.onload = (e) => {
           uploadedImage.src = e.target.result;
           uploadedImage.onload = () => {
-            console.log('Image successfully loaded.');
             uploadedImageReady = true;
             backgroundColor = getAverageColor(uploadedImage);
             document.body.style.backgroundColor = backgroundColor;
-    
-            // Prompt for the Pokémon name
-            console.log('Prompting for Pokémon name...');
+
             wildName = prompt("Enter the name of the wild Pokémon:");
-            if (!wildName) wildName = "Mystery Pokémon"; // Handle cancel or empty input
-            console.log('Wild Pokémon name:', wildName);
-    
+            if (!wildName) wildName = "Mystery Pokémon"; 
+
             // Show the wild Pokémon spotted message
             const wildMessage = `A wild ${wildName} has been spotted on the horizon!`;
-            alert(wildMessage); // Display message in alert box (you can style it differently if needed)
-    
+            document.getElementById('wild-message').textContent = wildMessage;
+            document.getElementById('wild-message').classList.add('visible');
+
             uploadContainer.classList.add('hidden');
             drawImageScaled(uploadedImage, canvas, ctx);
           };
@@ -254,22 +275,19 @@
       const animate = (timestamp) => {
         if (!startTime) startTime = timestamp;
         const elapsed = timestamp - startTime;
-        const progress = Math.min(elapsed / duration, 1); // Clamp progress to 1
+        const progress = Math.min(elapsed / duration, 1);
 
-        // Quadratic easing for smooth arc motion
         const x = startX + (mouseX - startX) * progress;
         const y =
           startY +
           (mouseY - startY) * progress -
           peakHeight * (1 - Math.pow(2 * progress - 1, 2)); // Arc equation
 
-        // Rotation logic
-        const rotation = progress * Math.PI * 4; // Full rotations during the throw
+        const rotation = progress * Math.PI * 4;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-        drawImageScaled(uploadedImage, canvas, ctx); // Redraw scaled image
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawImageScaled(uploadedImage, canvas, ctx);
 
-        // Draw rotating Poké Ball
         ctx.save();
         ctx.translate(x + ballSize / 2, y + ballSize / 2);
         ctx.rotate(rotation);
@@ -279,11 +297,11 @@
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
-          fadeElement.classList.add('active'); // Fade to white at the end
+          fadeElement.classList.add('active');
           setTimeout(() => {
             caughtMessage.textContent = `You caught a wild ${wildName}!`;
             caughtMessage.classList.add('visible');
-            nextButton.classList.add('visible'); // Show next button with animation
+            nextButton.classList.add('visible');
           }, 1000);
         }
       };
@@ -291,25 +309,24 @@
       requestAnimationFrame(animate);
     });
 
-    // Handle next Poké Ball selection
     function changePokeBall(index) {
       const previousIndex = currentPokeBallIndex;
-      currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length; // Wrap around
-    
+      currentPokeBallIndex = (index + pokeBallNames.length) % pokeBallNames.length;
+
       if (currentPokeBallIndex !== previousIndex) {
         const newSrc = `${pokeBallNames[currentPokeBallIndex]}.png`;
         pokeBallImg.style.opacity = 0;
-    
+
         setTimeout(() => {
-          pokeBallImg.src = newSrc; // Update the displayed image in the selector
-          pokeBall.src = newSrc; // Update the Poké Ball image used in animations
-          pokeBallImg.style.opacity = 1; // Fade-in effect
+          pokeBallImg.src = newSrc;
+          pokeBall.src = newSrc;
+          pokeBallImg.style.opacity = 1;
         }, 300);
       }
     }
 
     nextButton.addEventListener('click', () => {
-      location.reload(); // Reloads the page to restart
+      location.reload();
     });
   </script>
 </body>
