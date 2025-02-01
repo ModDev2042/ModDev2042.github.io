@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="main.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.1/docx.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            background-color: #d3d3d3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        .toolbar {
+            width: 90vw;
+            background: #b0b0b0;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .toolbar button, select {
+            padding: 5px 10px;
+            border: 1px solid #000;
+            background: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .editor-container {
+            width: 90vw;
+            height: 60vh;
+            background: #fff;
+            margin-top: 20px;
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            overflow-y: auto;
+        }
+        #fileInput {
+            margin-top: 10px;
+        }
+        .error-message {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+            display: none;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            height: 50px;
+            background-color: #b0b0b0;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18px;
+            color: black;
+            border: 2px dashed #000;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="filehubindex.html" class="back-button">Back</a>
+
+    <div class="toolbar">
+        <button onclick="document.execCommand('bold')">Bold</button>
+        <button onclick="document.execCommand('italic')">Italic</button>
+        <button onclick="document.execCommand('underline')">Underline</button>
+        <button onclick="document.execCommand('strikeThrough')">Strikethrough</button>
+        <select onchange="document.execCommand('fontName', false, this.value)">
+            <option value="Arial">Arial</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Verdana">Verdana</option>
+        </select>
+        <select onchange="document.execCommand('fontSize', false, this.value)">
+            <option value="1">Small</option>
+            <option value="3" selected>Normal</option>
+            <option value="5">Large</option>
+            <option value="7">Huge</option>
+        </select>
+    </div>
+
+    <div class="editor-container" contenteditable="true"></div>
+
+    <input type="file" id="fileInput" accept=".docx">
+    <div class="error-message" id="errorMessage">Error: Please upload a .docx file. Use our converter if needed.</div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file || !file.name.endsWith('.docx')) {
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+            document.getElementById('errorMessage').style.display = 'none';
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.querySelector('.editor-container').innerHTML = `Editing: ${file.name}`;
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
