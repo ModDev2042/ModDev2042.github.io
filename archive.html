@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="main.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Compressor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: white;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .grey-rectangle {
+            width: 90vw;
+            height: 200px;
+            background-color: #A9A9A9;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: black;
+            border: 2px dashed #696969;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .grey-rectangle.dragover {
+            background-color: #C0C0C0;
+        }
+        .compress-button, .decompress-button {
+            width: 200px;
+            height: 60px;
+            background-color: #A9A9A9;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: black;
+            border: 2px dashed #696969;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .error-message {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
+            display: none;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            height: 50px;
+            background-color: #A9A9A9;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: black;
+            border: 2px dashed #696969;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="filehubindex.html" class="back-button">Back</a>
+
+    <div class="grey-rectangle" id="dropzone">
+        Drag a file here or click to select
+    </div>
+    <input type="file" id="fileInput" multiple>
+
+    <div class="compress-button" id="compressButton">Compress</div>
+    <div class="decompress-button" id="decompressButton">Decompress</div>
+
+    <div class="error-message" id="errorMessage">Error: Check file selection.</div>
+
+    <script>
+        let selectedFiles = [];
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const errorMessage = document.getElementById('errorMessage');
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            selectedFiles = Array.from(files);
+            dropzone.textContent = `Selected files: ${selectedFiles.map(f => f.name).join(', ')}`;
+            errorMessage.style.display = 'none';
+        }
+
+        document.getElementById('compressButton').addEventListener('click', () => {
+            if (selectedFiles.length === 0) {
+                showError('No files selected.');
+                return;
+            }
+
+            const zip = new JSZip();
+            selectedFiles.forEach(file => zip.file(file.name, file));
+
+            zip.generateAsync({ type: "blob" }).then(content => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = "compressed.zip";
+                a.click();
+            });
+        });
+
+        document.getElementById('decompressButton').addEventListener('click', () => {
+            if (selectedFiles.length !== 1 || !selectedFiles[0].name.endsWith('.zip')) {
+                showError('Please select a single ZIP file.');
+                return;
+            }
+
+            const file = selectedFiles[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                JSZip.loadAsync(event.target.result).then(zip => {
+                    Object.keys(zip.files).forEach(filename => {
+                        zip.files[filename].async('blob').then(content => {
+                            const a = document.createElement('a');
+                            a.href = URL.createObjectURL(content);
+                            a.download = filename;
+                            a.click();
+                        });
+                    });
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        function showError(message) {
+            errorMessage.textContent = `Error: ${message}`;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>
