@@ -18,23 +18,46 @@
             align-items: center;
             height: 100vh;
         }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            height: 50px;
+            background-color: #b0b0b0;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 18px;
+            color: black;
+            border: 2px dashed #000;
+            cursor: pointer;
+            text-decoration: none;
+        }
         .toolbar {
             width: 90vw;
             background: #b0b0b0;
-            padding: 10px;
+            padding: 15px;
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 80px;
+            justify-content: center;
         }
-        .toolbar button, select {
-            padding: 5px 10px;
+        .toolbar button, .toolbar select, .toolbar input {
+            padding: 8px 15px;
             border: 1px solid #000;
             background: #fff;
             cursor: pointer;
             font-size: 16px;
             border-radius: 5px;
+            transition: 0.2s;
+        }
+        .toolbar button:hover, .toolbar select:hover, .toolbar input:hover {
+            background: #ddd;
         }
         .editor-container {
             width: 90vw;
@@ -55,23 +78,18 @@
             margin-top: 10px;
             display: none;
         }
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 150px;
-            height: 50px;
-            background-color: #b0b0b0;
-            border-radius: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'DM Sans', sans-serif;
+        .download-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #b0b0b0;
+            border: 2px solid #000;
+            border-radius: 10px;
             font-size: 18px;
-            color: black;
-            border: 2px dashed #000;
             cursor: pointer;
-            text-decoration: none;
+            transition: 0.2s;
+        }
+        .download-button:hover {
+            background: #ddd;
         }
     </style>
 </head>
@@ -89,21 +107,30 @@
             <option value="Georgia">Georgia</option>
             <option value="Times New Roman">Times New Roman</option>
             <option value="Verdana">Verdana</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Comic Sans MS">Comic Sans</option>
         </select>
-        <select onchange="document.execCommand('fontSize', false, this.value)">
-            <option value="1">Small</option>
-            <option value="3" selected>Normal</option>
-            <option value="5">Large</option>
-            <option value="7">Huge</option>
-        </select>
+        <input type="number" id="fontSize" min="1" max="7" value="3">
+        <button onclick="changeFontSize()">Set Size</button>
+        <button onclick="document.execCommand('justifyLeft')">Left</button>
+        <button onclick="document.execCommand('justifyCenter')">Center</button>
+        <button onclick="document.execCommand('justifyRight')">Right</button>
+        <button onclick="document.execCommand('justifyFull')">Justify</button>
     </div>
 
     <div class="editor-container" contenteditable="true"></div>
 
     <input type="file" id="fileInput" accept=".docx">
     <div class="error-message" id="errorMessage">Error: Please upload a .docx file. Use our converter if needed.</div>
+    <button class="download-button" onclick="downloadDocument()">Download as DOCX</button>
 
     <script>
+        function changeFontSize() {
+            const size = document.getElementById('fontSize').value;
+            document.execCommand('fontSize', false, size);
+        }
+
         document.getElementById('fileInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file || !file.name.endsWith('.docx')) {
@@ -118,6 +145,23 @@
             };
             reader.readAsArrayBuffer(file);
         });
+
+        function downloadDocument() {
+            const content = document.querySelector('.editor-container').innerHTML;
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [new docx.Paragraph({ text: content.replace(/<[^>]+>/g, '') })]
+                }]
+            });
+
+            docx.Packer.toBlob(doc).then(blob => {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "NewDocument.docx";
+                link.click();
+            });
+        }
     </script>
 </body>
 </html>
