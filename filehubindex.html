@@ -32,6 +32,13 @@
             margin: 10px;
             transition: transform 0.2s, border-color 0.2s;
         }
+        .backbutton {
+            background-color: #CEA2FD; /* Light purple for Back button */
+            border-color: #3E2F34; /* Darker purple border */
+            position: absolute; /* Makes positioning relative to the body */
+            top: 10px; /* Distance from the top */
+            left: 10px; /* Distance from the left */
+        }
         .converter {
             background-color: #87CEEB; /* Lighter blue for converter button */
         }
@@ -54,19 +61,12 @@
             background-color: #b0b0b0; /* Light pink */
             border-color: #000; /* Darker pink border */
         }
-        .back-button {
-            background-color: #CEA2FD; /* Light purple for Back button */
-            border-color: #3E2F34; /* Darker purple border */
-            position: absolute; /* Makes positioning relative to the body */
-            top: 10px; /* Distance from the top */
-            left: 10px; /* Distance from the left */
-        }
     </style>
 </head>
 <body>
 
     <!-- Moved the back button to the top -->
-    <button class="button back-button" onclick="window.location.href='index.html'">Back</button>
+    <button class="button backbutton" onclick="window.location.href='index.html'">Back</button>
 
     <h1>The File Hub</h1> <!-- Title added here -->
 
