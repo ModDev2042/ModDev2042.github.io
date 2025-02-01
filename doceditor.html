@@ -6,7 +6,8 @@
     <title>Advanced Document Editor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -23,20 +24,18 @@
             padding: 10px;
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-around;
+            gap: 10px;
             position: fixed;
-            top: 50px;
+            top: 40px;
             left: 0;
-            right: 0;
             z-index: 1000;
         }
         .toolbar select, .toolbar input, .toolbar button {
             padding: 5px;
             font-size: 14px;
-            margin: 5px;
         }
         .editor-container {
-            margin-top: 120px;
+            margin-top: 100px;
             width: 80%;
             background: white;
             padding: 20px;
@@ -60,6 +59,9 @@
             border-radius: 5px;
             font-size: 16px;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -67,35 +69,23 @@
 <a href="filehubindex.html" class="back-button">Back</a>
 
 <div class="toolbar">
-    <select id="fontFamily">
-        <option value="Inter">Inter</option>
-        <option value="Arial">Arial</option>
-        <option value="Times New Roman">Times New Roman</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Roboto">Roboto</option>
-    </select>
+    <select id="fontFamily"></select>
     <input type="number" id="fontSize" min="8" max="72" value="16">
     <button onclick="format('bold')"><i class="fas fa-bold"></i></button>
     <button onclick="format('italic')"><i class="fas fa-italic"></i></button>
     <button onclick="format('underline')"><i class="fas fa-underline"></i></button>
     <button onclick="format('strikeThrough')"><i class="fas fa-strikethrough"></i></button>
-    <button onclick="format('superscript')"><i class="fas fa-superscript"></i></button>
-    <button onclick="format('subscript')"><i class="fas fa-subscript"></i></button>
     <button onclick="format('justifyLeft')"><i class="fas fa-align-left"></i></button>
     <button onclick="format('justifyCenter')"><i class="fas fa-align-center"></i></button>
     <button onclick="format('justifyRight')"><i class="fas fa-align-right"></i></button>
+    <button onclick="insertLink()">Insert Link</button>
     <input type="color" id="textColor">
     <input type="color" id="highlightColor">
-    <button onclick="insertBullet()">•</button>
-    <button onclick="insertNumberedList()">1.</button>
-    <button onclick="insertLink()"><i class="fas fa-link"></i></button>
-    <button onclick="insertImage()"><i class="fas fa-image"></i></button>
-    <button onclick="insertTable()"><i class="fas fa-table"></i></button>
-    <button onclick="insertHorizontalLine()">―</button>
-    <button onclick="insertSpecialCharacter()">Ω</button>
-    <button onclick="insertEquation()">∑</button>
-    <button onclick="insertWatermark()">WM</button>
-    <button onclick="insertPageBreak()">PB</button>
+    <button onclick="insertImage()">Insert Image</button>
+    <input type="file" id="imageUpload" class="hidden" accept="image/*">
+    <button onclick="insertTable()">Insert Table</button>
+    <button onclick="insertEquation()">Insert Equation</button>
+    <button onclick="insertSpecialCharacter()">Special Characters</button>
     <button onclick="downloadDoc()">Download</button>
 </div>
 
@@ -108,10 +98,6 @@
         document.execCommand(command, false, null);
     }
 
-    document.getElementById("fontFamily").addEventListener("change", function() {
-        document.execCommand("fontName", false, this.value);
-    });
-
     document.getElementById("fontSize").addEventListener("change", function() {
         document.execCommand("fontSize", false, "7");
         let fontElements = document.getElementById("editor").getElementsByTagName("font");
@@ -123,6 +109,15 @@
         }
     });
 
+    document.getElementById("fontFamily").addEventListener("change", function() {
+        document.execCommand("fontName", false, this.value);
+    });
+
+    function insertLink() {
+        let url = prompt("Enter URL:");
+        if (url) document.execCommand("createLink", false, url);
+    }
+
     document.getElementById("textColor").addEventListener("change", function() {
         document.execCommand("foreColor", false, this.value);
     });
@@ -131,54 +126,50 @@
         document.execCommand("hiliteColor", false, this.value);
     });
 
-    function insertBullet() {
-        document.execCommand("insertUnorderedList", false, null);
-    }
-
-    function insertNumberedList() {
-        document.execCommand("insertOrderedList", false, null);
-    }
-
-    function insertLink() {
-        let url = prompt("Enter the URL:");
-        if (url) document.execCommand("createLink", false, url);
-    }
-
     function insertImage() {
-        let url = prompt("Enter the image URL:");
-        if (url) document.execCommand("insertImage", false, url);
+        document.getElementById("imageUpload").click();
     }
+
+    document.getElementById("imageUpload").addEventListener("change", function(event) {
+        let file = event.target.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                document.execCommand("insertImage", false, e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
     function insertTable() {
-        let table = "<table border='1'><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
-        document.execCommand("insertHTML", false, table);
-    }
-
-    function insertHorizontalLine() {
-        document.execCommand("insertHorizontalRule", false, null);
-    }
-
-    function insertSpecialCharacter() {
-        let char = prompt("Enter special character:");
-        if (char) document.execCommand("insertText", false, char);
+        let rows = prompt("Number of rows:");
+        let cols = prompt("Number of columns:");
+        if (rows && cols) {
+            let table = "<table border='1' style='border-collapse:collapse;width:100%;'>";
+            for (let i = 0; i < rows; i++) {
+                table += "<tr>";
+                for (let j = 0; j < cols; j++) {
+                    table += "<td style='padding:5px;'></td>";
+                }
+                table += "</tr>";
+            }
+            table += "</table>";
+            document.execCommand("insertHTML", false, table);
+        }
     }
 
     function insertEquation() {
         let equation = prompt("Enter LaTeX equation:");
         if (equation) {
-            let latex = "\\(" + equation + "\\)";
-            document.execCommand("insertHTML", false, latex);
+            let math = `\\(${equation}\\)`;
+            document.execCommand("insertHTML", false, math);
+            MathJax.typeset();
         }
     }
 
-    function insertWatermark() {
-        let watermark = "<div style='position: absolute; opacity: 0.3; font-size: 50px;'>Watermark</div>";
-        document.execCommand("insertHTML", false, watermark);
-    }
-
-    function insertPageBreak() {
-        let pageBreak = "<div style='page-break-after: always;'></div>";
-        document.execCommand("insertHTML", false, pageBreak);
+    function insertSpecialCharacter() {
+        let char = prompt("Enter special character:");
+        if (char) document.execCommand("insertText", false, char);
     }
 
     function downloadDoc() {
@@ -189,6 +180,21 @@
         a.download = "document.doc";
         a.click();
     }
+
+    let fonts = [
+        "Arial", "Verdana", "Times New Roman", "Courier New", "Georgia", "Garamond",
+        "Comic Sans MS", "Impact", "Trebuchet MS", "Palatino Linotype", "Tahoma",
+        "Lucida Sans Unicode", "Franklin Gothic Medium", "Century Gothic", "Cambria",
+        "Consolas", "Baskerville", "Candara", "Book Antiqua", "Futura", "Geneva",
+        "Optima", "Didot", "Rockwell", "Gill Sans", "Ebrima", "Brush Script MT"
+    ];
+    let fontSelector = document.getElementById("fontFamily");
+    fonts.forEach(font => {
+        let option = document.createElement("option");
+        option.value = font;
+        option.textContent = font;
+        fontSelector.appendChild(option);
+    });
 </script>
 
 </body>
