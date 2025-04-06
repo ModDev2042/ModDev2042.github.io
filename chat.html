@@ -86,16 +86,23 @@
     .dark-mode-toggle:hover {
       background-color: #555;
     }
+    .form-container {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="sidebar">
       <h2>Chat App</h2>
-      <button id="globalChatBtn">Global Chat</button>
-      <input type="text" id="addChatInput" placeholder="Add Chat">
-      <button id="addChatBtn">+</button>
-      <button id="logoutBtn">Logout</button>
+      <div id="authStatus">
+        <button id="loginBtn">Login</button>
+        <button id="registerBtn">Register</button>
+      </div>
+      <button id="globalChatBtn" style="display:none;">Global Chat</button>
+      <input type="text" id="addChatInput" placeholder="Add Chat" style="display:none;">
+      <button id="addChatBtn" style="display:none;">+</button>
+      <button id="logoutBtn" style="display:none;">Logout</button>
       <div>
         <label for="darkModeToggle">Dark Mode:</label>
         <input type="checkbox" id="darkModeToggle">
@@ -104,7 +111,7 @@
     <div class="main-content">
       <h1>Welcome to the Chat</h1>
       <div id="chatContainer" class="chat-container"></div>
-      <form id="chatForm">
+      <form id="chatForm" class="form-container" style="display:none;">
         <textarea id="messageContent" placeholder="Type a message..." required></textarea><br>
         <button type="submit">Send</button>
       </form>
@@ -113,8 +120,8 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getDatabase, ref, push, set, onChildAdded, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAeSaLNKclR4Fo6I9LVDOSBPH8nbBIhvZo",
@@ -140,10 +147,27 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const chatContainer = document.getElementById("chatContainer");
     const darkModeToggle = document.getElementById("darkModeToggle");
+    const authStatus = document.getElementById("authStatus");
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
 
     // Dark mode toggle
     darkModeToggle.addEventListener("change", () => {
       document.body.classList.toggle("dark-mode", darkModeToggle.checked);
+    });
+
+    // Login functionality
+    loginBtn.addEventListener("click", () => {
+      const email = prompt("Enter your email:");
+      const password = prompt("Enter your password:");
+      loginUser(email, password);
+    });
+
+    // Register functionality
+    registerBtn.addEventListener("click", () => {
+      const email = prompt("Enter your email:");
+      const password = prompt("Enter your password:");
+      registerUser(email, password);
     });
 
     // Global chat functionality
@@ -174,6 +198,7 @@
       });
 
       // Send message functionality
+      chatForm.style.display = 'block'; // Show the message form
       chatForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const user = auth.currentUser;
@@ -193,8 +218,18 @@
     function handleAuthChange(user) {
       if (user) {
         document.getElementById("logoutBtn").style.display = "block";
+        document.getElementById("loginBtn").style.display = "none";
+        document.getElementById("registerBtn").style.display = "none";
+        globalChatBtn.style.display = "block";
+        addChatInput.style.display = "block";
+        addChatBtn.style.display = "block";
       } else {
         document.getElementById("logoutBtn").style.display = "none";
+        document.getElementById("loginBtn").style.display = "block";
+        document.getElementById("registerBtn").style.display = "block";
+        globalChatBtn.style.display = "none";
+        addChatInput.style.display = "none";
+        addChatBtn.style.display = "none";
       }
     }
 
@@ -202,8 +237,10 @@
     async function registerUser(email, password) {
       try {
         await createUserWithEmailAndPassword(auth, email, password);
+        alert("Registration successful!");
       } catch (error) {
         console.error(error.message);
+        alert("Registration failed!");
       }
     }
 
@@ -211,8 +248,10 @@
     async function loginUser(email, password) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
       } catch (error) {
         console.error(error.message);
+        alert("Login failed!");
       }
     }
 
@@ -221,11 +260,8 @@
       await signOut(auth);
     });
 
-    auth.onAuthStateChanged(handleAuthChange);
+    onAuthStateChanged(auth, handleAuthChange);
 
-    // Test login or registration (replace with actual UI later)
-    //registerUser("test@example.com", "password123");
-    //loginUser("test@example.com", "password123");
   </script>
 </body>
 </html>
