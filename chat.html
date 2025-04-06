@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Post Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #posts {
+      margin-top: 20px;
+    }
+    .post {
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Post Something</h1>
+  <form id="postForm">
+    <textarea id="postContent" placeholder="Write your post here..."></textarea><br>
+    <button type="submit">Post</button>
+  </form>
+
+  <h2>Posts</h2>
+  <div id="posts"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onChildAdded, remove, get, child } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeSaLNKclR4Fo6I9LVDOSBPH8nbBIhvZo",
+      authDomain: "chat-93c0e.firebaseapp.com",
+      databaseURL: "https://chat-93c0e-default-rtdb.firebaseio.com",
+      projectId: "chat-93c0e",
+      storageBucket: "chat-93c0e.firebasestorage.app",
+      messagingSenderId: "856793500712",
+      appId: "1:856793500712:web:89ed12195b27d9c3be791d",
+      measurementId: "G-JTNPZMYQVE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+
+    // Handle post form submission
+    document.getElementById("postForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const content = document.getElementById("postContent").value;
+      if (content.trim()) {
+        const newPostRef = push(ref(database, 'posts'));
+        set(newPostRef, {
+          content: content,
+          timestamp: Date.now()
+        });
+
+        document.getElementById("postContent").value = ''; // Clear the textarea
+      }
+    });
+
+    // Display posts from Firebase and remove old ones
+    const postsRef = ref(database, 'posts');
+    onChildAdded(postsRef, function(snapshot) {
+      const post = snapshot.val();
+      const postTime = post.timestamp;
+      const currentTime = Date.now();
+      
+      // Check if the post is older than 20 minutes (1200000 ms)
+      if (currentTime - postTime > 1200000) {
+        remove(ref(database, 'posts/' + snapshot.key)); // Remove old post
+      } else {
+        const postElement = document.createElement("div");
+        postElement.classList.add("post");
+        postElement.textContent = post.content;
+        document.getElementById("posts").appendChild(postElement);
+      }
+    });
+  </script>
+</body>
+</html>
