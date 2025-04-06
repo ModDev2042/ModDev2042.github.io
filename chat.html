@@ -3,12 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Post Website</title>
+  <title>Chat</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       background-color: #f4f4f4;
+    }
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
     }
     textarea {
       width: 100%;
@@ -29,33 +38,37 @@
     button:hover {
       background-color: #0056b3;
     }
-    #posts {
-      margin-top: 20px;
-    }
-    .post {
+    .message {
       padding: 10px;
       background-color: #fff;
       border: 1px solid #ddd;
       margin-bottom: 10px;
       border-radius: 5px;
     }
+    .message span {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>Post Something</h1>
-  <form id="postForm">
-    <textarea id="postContent" placeholder="Write your post here..."></textarea><br>
-    <button type="submit">Post</button>
-  </form>
+  <h1>Global Chat</h1>
 
-  <h2>Posts</h2>
-  <div id="posts"></div>
+  <label for="username">Choose a Username:</label>
+  <input type="text" id="username" placeholder="Enter username" required><br><br>
+
+  <div id="chat-container"></div>
+
+  <form id="chatForm">
+    <textarea id="messageContent" placeholder="Write your message here..." required></textarea><br>
+    <button type="submit">Send</button>
+  </form>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getDatabase, ref, push, set, onChildAdded, remove, get, child } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAeSaLNKclR4Fo6I9LVDOSBPH8nbBIhvZo",
       authDomain: "chat-93c0e.firebaseapp.com",
@@ -71,38 +84,36 @@
     const analytics = getAnalytics(app);
     const database = getDatabase(app);
 
-    // Handle post form submission
-    document.getElementById("postForm").addEventListener("submit", function(e) {
+    // Handle message submission
+    document.getElementById("chatForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      
+      const username = document.getElementById("username").value.trim();
+      const messageContent = document.getElementById("messageContent").value.trim();
+      if (username && messageContent) {
+        // Sanitize user input to prevent XSS
+        const safeMessage = messageContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      const content = document.getElementById("postContent").value;
-      if (content.trim()) {
-        const newPostRef = push(ref(database, 'posts'));
-        set(newPostRef, {
-          content: content,
+        const newMessageRef = push(ref(database, 'messages'));
+        set(newMessageRef, {
+          username: username,
+          message: safeMessage,
           timestamp: Date.now()
         });
 
-        document.getElementById("postContent").value = ''; // Clear the textarea
+        document.getElementById("messageContent").value = ''; // Clear message input
       }
     });
 
-    // Display posts from Firebase and remove old ones
-    const postsRef = ref(database, 'posts');
-    onChildAdded(postsRef, function(snapshot) {
-      const post = snapshot.val();
-      const postTime = post.timestamp;
-      const currentTime = Date.now();
-      
-      // Check if the post is older than 20 minutes (1200000 ms)
-      if (currentTime - postTime > 1200000) {
-        remove(ref(database, 'posts/' + snapshot.key)); // Remove old post
-      } else {
-        const postElement = document.createElement("div");
-        postElement.classList.add("post");
-        postElement.textContent = post.content;
-        document.getElementById("posts").appendChild(postElement);
-      }
+    // Display messages
+    const messagesRef = ref(database, 'messages');
+    onChildAdded(messagesRef, function(snapshot) {
+      const message = snapshot.val();
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message");
+      messageElement.innerHTML = `<span>${message.username}:</span> ${message.message}`;
+      document.getElementById("chat-container").appendChild(messageElement);
+      document.getElementById("chat-container").scrollTop = document.getElementById("chat-container").scrollHeight;  // Auto-scroll
     });
   </script>
 </body>
