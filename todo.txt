@@ -4,3 +4,8 @@ Sorting Algs
 Connect 4 Bot
 extension
 mobile glitches
+chat and auth
+move or link wqnet
+folders
+secrets
+
