@@ -1,267 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Website</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Chat</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
+      margin: 0;
       background-color: #f4f4f4;
-      color: #333;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s, color 0.3s;
     }
-    body.dark-mode {
+    .dark {
       background-color: #121212;
-      color: #fff;
+      color: #e0e0e0;
     }
-    .container {
-      display: flex;
-      height: 100vh;
-    }
-    .sidebar {
-      width: 250px;
-      background-color: #007bff;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 20px;
+    #sidebar {
       position: fixed;
-      height: 100%;
       top: 0;
       left: 0;
-    }
-    .sidebar h2 {
-      margin-bottom: 30px;
-      font-size: 24px;
-    }
-    .sidebar button, .sidebar input {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-    }
-    .sidebar button:hover, .sidebar input:hover {
-      background-color: #0056b3;
-    }
-    .main-content {
-      margin-left: 270px;
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 400px;
-      border: 1px solid #ddd;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: white;
-    }
-    .message {
-      padding: 10px;
-      background-color: #f1f1f1;
-      margin-bottom: 10px;
-      border-radius: 5px;
-    }
-    .dark-mode-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
+      bottom: 0;
+      width: 200px;
       background-color: #333;
       color: white;
+      padding: 20px;
+    }
+    #main {
+      margin-left: 220px;
+      padding: 20px;
+    }
+    #messages {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+    .message {
+      background: white;
       padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .dark .message {
+      background: #1f1f1f;
+    }
+    #messageInput {
+      width: 80%;
+      padding: 10px;
+    }
+    #sendBtn {
+      padding: 10px;
+    }
+    #darkToggle {
+      margin-top: 20px;
+      cursor: pointer;
+      background: #555;
+      color: white;
+      padding: 5px;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-    }
-    .dark-mode-toggle:hover {
-      background-color: #555;
-    }
-    .form-container {
-      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="sidebar">
-      <h2>Chat App</h2>
-      <div id="authStatus">
-        <button id="loginBtn">Login</button>
-        <button id="registerBtn">Register</button>
-      </div>
-      <button id="globalChatBtn" style="display:none;">Global Chat</button>
-      <input type="text" id="addChatInput" placeholder="Add Chat" style="display:none;">
-      <button id="addChatBtn" style="display:none;">+</button>
-      <button id="logoutBtn" style="display:none;">Logout</button>
-      <div>
-        <label for="darkModeToggle">Dark Mode:</label>
-        <input type="checkbox" id="darkModeToggle">
-      </div>
-    </div>
-    <div class="main-content">
-      <h1>Welcome to the Chat</h1>
-      <div id="chatContainer" class="chat-container"></div>
-      <form id="chatForm" class="form-container" style="display:none;">
-        <textarea id="messageContent" placeholder="Type a message..." required></textarea><br>
-        <button type="submit">Send</button>
-      </form>
-    </div>
+  <div id="sidebar">
+    <h2>Chats</h2>
+    <p>Global Chat</p>
+    <button id="darkToggle">Toggle Dark Mode</button>
+  </div>
+
+  <div id="main">
+    <h1>Global Chat</h1>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button id="sendBtn">Send</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onChildAdded,
+      remove,
+      get
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAeSaLNKclR4Fo6I9LVDOSBPH8nbBIhvZo",
       authDomain: "chat-93c0e.firebaseapp.com",
       databaseURL: "https://chat-93c0e-default-rtdb.firebaseio.com",
       projectId: "chat-93c0e",
-      storageBucket: "chat-93c0e.firebasestorage.app",
+      storageBucket: "chat-93c0e.appspot.com",
       messagingSenderId: "856793500712",
       appId: "1:856793500712:web:89ed12195b27d9c3be791d",
       measurementId: "G-JTNPZMYQVE"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
+    const db = getDatabase(app);
 
-    // Elements
-    const globalChatBtn = document.getElementById("globalChatBtn");
-    const addChatInput = document.getElementById("addChatInput");
-    const addChatBtn = document.getElementById("addChatBtn");
-    const chatForm = document.getElementById("chatForm");
-    const messageContent = document.getElementById("messageContent");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const chatContainer = document.getElementById("chatContainer");
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    const authStatus = document.getElementById("authStatus");
-    const loginBtn = document.getElementById("loginBtn");
-    const registerBtn = document.getElementById("registerBtn");
+    const username = prompt("Enter your display name:") || "Anonymous";
+
+    const messagesRef = ref(db, "global_messages");
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const input = document.getElementById("messageInput");
+      const content = input.value.trim();
+      if (content) {
+        push(messagesRef, {
+          user: username,
+          content,
+          timestamp: Date.now()
+        });
+        input.value = "";
+      }
+    });
+
+    onChildAdded(messagesRef, (snapshot) => {
+      const msg = snapshot.val();
+      const id = snapshot.key;
+      const now = Date.now();
+      if (now - msg.timestamp > 20 * 60 * 1000) {
+        remove(ref(db, `global_messages/${id}`));
+        return;
+      }
+
+      const el = document.createElement("div");
+      el.className = "message";
+      el.innerHTML = `<strong>${msg.user}:</strong> ${msg.content}`;
+      document.getElementById("messages").appendChild(el);
+    });
 
     // Dark mode toggle
-    darkModeToggle.addEventListener("change", () => {
-      document.body.classList.toggle("dark-mode", darkModeToggle.checked);
+    document.getElementById("darkToggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
     });
-
-    // Login functionality
-    loginBtn.addEventListener("click", () => {
-      const email = prompt("Enter your email:");
-      const password = prompt("Enter your password:");
-      loginUser(email, password);
-    });
-
-    // Register functionality
-    registerBtn.addEventListener("click", () => {
-      const email = prompt("Enter your email:");
-      const password = prompt("Enter your password:");
-      registerUser(email, password);
-    });
-
-    // Global chat functionality
-    globalChatBtn.addEventListener("click", () => {
-      loadChat("global");
-    });
-
-    // Add personal chat functionality
-    addChatBtn.addEventListener("click", () => {
-      const chatName = addChatInput.value.trim();
-      if (chatName) {
-        loadChat(chatName);
-        addChatInput.value = ''; // Clear input
-      }
-    });
-
-    // Load messages for a specific chat
-    function loadChat(chatName) {
-      chatContainer.innerHTML = ""; // Clear previous messages
-
-      const chatRef = ref(database, `chats/${chatName}`);
-      onChildAdded(chatRef, (snapshot) => {
-        const message = snapshot.val();
-        const messageElement = document.createElement("div");
-        messageElement.classList.add("message");
-        messageElement.innerHTML = `<strong>${message.username}:</strong> ${message.content}`;
-        chatContainer.appendChild(messageElement);
-      });
-
-      // Send message functionality
-      chatForm.style.display = 'block'; // Show the message form
-      chatForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const user = auth.currentUser;
-        if (user && messageContent.value.trim()) {
-          const newMessageRef = push(ref(database, `chats/${chatName}`));
-          set(newMessageRef, {
-            username: user.email,
-            content: messageContent.value.trim(),
-            timestamp: Date.now()
-          });
-          messageContent.value = ""; // Clear input
-        }
-      });
-    }
-
-    // Firebase authentication
-    function handleAuthChange(user) {
-      if (user) {
-        document.getElementById("logoutBtn").style.display = "block";
-        document.getElementById("loginBtn").style.display = "none";
-        document.getElementById("registerBtn").style.display = "none";
-        globalChatBtn.style.display = "block";
-        addChatInput.style.display = "block";
-        addChatBtn.style.display = "block";
-      } else {
-        document.getElementById("logoutBtn").style.display = "none";
-        document.getElementById("loginBtn").style.display = "block";
-        document.getElementById("registerBtn").style.display = "block";
-        globalChatBtn.style.display = "none";
-        addChatInput.style.display = "none";
-        addChatBtn.style.display = "none";
-      }
-    }
-
-    // Register new user
-    async function registerUser(email, password) {
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Registration successful!");
-      } catch (error) {
-        console.error(error.message);
-        alert("Registration failed!");
-      }
-    }
-
-    // Log in existing user
-    async function loginUser(email, password) {
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Login successful!");
-      } catch (error) {
-        console.error(error.message);
-        alert("Login failed!");
-      }
-    }
-
-    // Log out user
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-    });
-
-    onAuthStateChanged(auth, handleAuthChange);
-
   </script>
 </body>
 </html>
