@@ -5,86 +5,166 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Global Chat</title>
   <style>
+    :root {
+      --bg: #f4f4f4;
+      --text: #222;
+      --primary: #007bff;
+      --sidebar: #ffffff;
+      --chat-bg: #ffffff;
+    }
+
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #f0f0f0;
+      --primary: #66aaff;
+      --sidebar: #2c2c2c;
+      --chat-bg: #2b2b2b;
+    }
+
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #f4f4f4;
-      transition: background-color 0.3s, color 0.3s;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
     }
-    .dark {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-    #sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 200px;
-      background-color: #333;
-      color: white;
+
+    .sidebar {
+      background-color: var(--sidebar);
+      width: 250px;
       padding: 20px;
+      box-sizing: border-box;
+      border-right: 1px solid #ccc;
     }
-    #main {
-      margin-left: 220px;
-      padding: 20px;
+
+    .sidebar h2 {
+      margin-top: 0;
     }
-    #messages {
-      max-height: 400px;
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .messages {
+      flex: 1;
       overflow-y: auto;
-      margin-bottom: 20px;
+      padding: 20px;
+      background-color: var(--chat-bg);
     }
+
     .message {
-      background: white;
+      margin-bottom: 15px;
       padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
+      background: var(--sidebar);
+      border-radius: 8px;
     }
-    .dark .message {
-      background: #1f1f1f;
+
+    .message strong {
+      color: var(--primary);
     }
-    #messageInput {
-      width: 80%;
+
+    .input-area {
+      display: flex;
+      padding: 15px;
+      gap: 10px;
+      background-color: var(--sidebar);
+      border-top: 1px solid #ccc;
+    }
+
+    input, textarea, button {
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
       padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    #sendBtn {
-      padding: 10px;
-    }
-    #darkToggle {
-      margin-top: 20px;
-      cursor: pointer;
-      background: #555;
+
+    button {
+      padding: 10px 15px;
+      background-color: var(--primary);
       color: white;
-      padding: 5px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border-bottom: 1px solid #ccc;
+      background-color: var(--sidebar);
+    }
+
+    .dark-toggle {
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .mobile-sidebar-button {
+      display: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: absolute;
+        z-index: 10;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        transition: left 0.3s;
+      }
+
+      .sidebar.show {
+        left: 0;
+      }
+
+      .mobile-sidebar-button {
+        display: inline-block;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <h2>Chats</h2>
-    <p>Global Chat</p>
-    <button id="darkToggle">Toggle Dark Mode</button>
+  <div class="sidebar" id="sidebar">
+    <h2>Chat Options</h2>
+    <p><strong>Global Chat</strong></p>
+    <button onclick="addChat()">+ Add User Chat</button>
   </div>
 
-  <div id="main">
-    <h1>Global Chat</h1>
-    <div id="messages"></div>
-    <input type="text" id="messageInput" placeholder="Type a message..." />
-    <button id="sendBtn">Send</button>
+  <div class="chat-container">
+    <div class="topbar">
+      <span class="mobile-sidebar-button" onclick="toggleSidebar()">☰</span>
+      <span>Global Chat</span>
+      <span class="dark-toggle" onclick="toggleDarkMode()">🌓 Theme</span>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <form class="input-area" id="messageForm">
+      <textarea id="messageInput" placeholder="Type your message..."></textarea>
+      <button type="submit">Send</button>
+    </form>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onChildAdded,
-      remove,
-      get
-    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAeSaLNKclR4Fo6I9LVDOSBPH8nbBIhvZo",
@@ -93,49 +173,60 @@
       projectId: "chat-93c0e",
       storageBucket: "chat-93c0e.appspot.com",
       messagingSenderId: "856793500712",
-      appId: "1:856793500712:web:89ed12195b27d9c3be791d",
-      measurementId: "G-JTNPZMYQVE"
+      appId: "1:856793500712:web:89ed12195b27d9c3be791d"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const chatRef = ref(db, "global_chat");
 
-    const username = prompt("Enter your display name:") || "Anonymous";
+    const name = prompt("Enter your chat name") || "Anonymous";
 
-    const messagesRef = ref(db, "global_messages");
-
-    document.getElementById("sendBtn").addEventListener("click", () => {
-      const input = document.getElementById("messageInput");
-      const content = input.value.trim();
-      if (content) {
-        push(messagesRef, {
-          user: username,
-          content,
+    // Send message
+    document.getElementById("messageForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const msg = document.getElementById("messageInput").value.trim();
+      if (msg) {
+        push(chatRef, {
+          name: name,
+          message: msg,
           timestamp: Date.now()
         });
-        input.value = "";
+        document.getElementById("messageInput").value = "";
       }
     });
 
-    onChildAdded(messagesRef, (snapshot) => {
-      const msg = snapshot.val();
-      const id = snapshot.key;
+    // Show messages
+    onChildAdded(chatRef, snapshot => {
+      const data = snapshot.val();
       const now = Date.now();
-      if (now - msg.timestamp > 20 * 60 * 1000) {
-        remove(ref(db, `global_messages/${id}`));
+      if (now - data.timestamp > 20 * 60 * 1000) {
+        remove(snapshot.ref); // delete if over 20 mins old
         return;
       }
 
-      const el = document.createElement("div");
-      el.className = "message";
-      el.innerHTML = `<strong>${msg.user}:</strong> ${msg.content}`;
-      document.getElementById("messages").appendChild(el);
+      const div = document.createElement("div");
+      div.className = "message";
+      div.innerHTML = `<strong>${data.name}:</strong> ${data.message}`;
+      document.getElementById("messages").appendChild(div);
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
     });
 
-    // Dark mode toggle
-    document.getElementById("darkToggle").addEventListener("click", () => {
+    // Theme
+    function toggleDarkMode() {
       document.body.classList.toggle("dark");
-    });
+    }
+
+    // Sidebar toggle
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("show");
+    }
+
+    // Add user chat prompt (not functional yet)
+    function addChat() {
+      const otherUser = prompt("Enter username to chat with");
+      if (otherUser) alert("Feature coming soon: private chats with " + otherUser);
+    }
   </script>
 </body>
 </html>
