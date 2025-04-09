@@ -251,6 +251,13 @@
       }
     });
 
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+
     onChildAdded(messagesRef, (snapshot) => {
       const data = snapshot.val();
       const div = document.createElement("div");
@@ -265,11 +272,16 @@
     const sidebar = document.getElementById("sidebar");
     const darkToggle = document.getElementById("darkToggle");
 
-    if (menuToggle) {
-      menuToggle.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
-      });
-    }
+    menuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    // Close menu when clicking outside
+    document.body.addEventListener("click", (e) => {
+      if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove("open");
+      }
+    });
 
     if (darkToggle) {
       darkToggle.addEventListener("change", () => {
