@@ -2,18 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Randomized Resume</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body id="app" class="transition-all duration-300"></body>
 
 <script>
-  // Generate random Tailwind color palettes
-  const colorNames = [
-    "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky",
-    "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", "gray", "zinc", "neutral", "stone"
-  ];
+  const fonts = ["font-sans", "font-serif", "font-mono", "font-medium", "font-light"];
+  const colorNames = ["red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", "gray", "zinc", "neutral", "stone"];
 
   const getColorPalette = () => {
     const color = colorNames[Math.floor(Math.random() * colorNames.length)];
@@ -25,19 +23,45 @@
     };
   };
 
-  const fonts = ["font-sans", "font-serif", "font-mono", "font-medium", "font-light"];
+  const profileImages = [
+    "https://randomuser.me/api/portraits/men/32.jpg",
+    "https://randomuser.me/api/portraits/women/44.jpg",
+  ];
 
-  // Variants for each section
+  const names = ["Jane Doe", "John Smith", "Alex Johnson", "Taylor Ray", "Morgan Lee"];
+
+  const titleVariants = [
+    ({ theme, name, img }) => `
+      <header class="${theme.bg} ${theme.text} py-8 px-6 text-center space-y-4">
+        <img src="${img}" alt="Profile" class="mx-auto w-24 h-24 rounded-full border-4 border-white shadow" />
+        <h1 class="text-4xl font-bold">${name}</h1>
+        <p class="text-lg">Web Developer | Creative Thinker</p>
+        <button onclick="downloadPDF()" class="${theme.accent} ${theme.hover} text-white px-6 py-2 rounded-full">Download Resume</button>
+      </header>
+    `,
+    ({ theme, name, img }) => `
+      <header class="${theme.bg} ${theme.text} py-6 px-6 flex items-center justify-between max-w-4xl mx-auto">
+        <div class="flex items-center space-x-4">
+          <img src="${img}" alt="Profile" class="w-20 h-20 rounded-full shadow" />
+          <div>
+            <h1 class="text-3xl font-bold">${name}</h1>
+            <p>Full Stack Developer | Freelancer</p>
+          </div>
+        </div>
+        <button onclick="downloadPDF()" class="${theme.accent} ${theme.hover} text-white px-4 py-2 rounded">Download</button>
+      </header>
+    `,
+    ({ theme, name, img }) => `
+      <header class="${theme.bg} ${theme.text} py-10 px-6 text-center">
+        <h1 class="text-5xl font-extrabold tracking-wide">${name}</h1>
+        <p class="mt-2">Frontend Developer & UI Designer</p>
+        <img src="${img}" alt="Profile" class="mt-4 mx-auto w-20 h-20 rounded-full border border-gray-300" />
+        <button onclick="downloadPDF()" class="mt-4 ${theme.accent} ${theme.hover} text-white px-6 py-2 rounded-full">Download Resume</button>
+      </header>
+    `
+  ];
+
   const layouts = {
-    header: [
-      ({ theme }) => `
-        <header class="${theme.bg} ${theme.text} py-8 px-4 text-center">
-          <h1 class="text-4xl font-bold">Your Name</h1>
-          <p class="text-lg mt-2">Frontend Developer | UI/UX Enthusiast | Freelancer</p>
-          <a href="resume.pdf" class="mt-4 inline-block ${theme.accent} ${theme.hover} text-white px-6 py-2 rounded-full">Download Resume</a>
-        </header>
-      `
-    ],
     about: [
       ({ theme }) => `
         <section class="py-10 px-6 max-w-4xl mx-auto ${theme.text}">
@@ -84,46 +108,56 @@
         </section>
       `
     ],
-    contact: [
+    education: [
       ({ theme }) => `
         <section class="py-10 px-6 max-w-4xl mx-auto ${theme.text}">
-          <h2 class="text-2xl font-semibold mb-4">Contact Me</h2>
-          <div class="space-y-4">
-            <input id="email-subject" type="text" placeholder="Subject" class="w-full border p-2 rounded" />
-            <textarea id="email-body" placeholder="Your Message" rows="5" class="w-full border p-2 rounded"></textarea>
-            <button onclick="sendEmail()" class="${theme.accent} ${theme.hover} text-white px-6 py-2 rounded">Open Mail App</button>
+          <h2 class="text-2xl font-semibold mb-4">Education</h2>
+          <div>
+            <h3 class="text-xl font-bold">B.Sc. in Computer Science</h3>
+            <p class="text-sm text-gray-500">University of Example — 2018–2022</p>
+            <p class="mt-2">Graduated with honors, focused on web development and UI/UX.</p>
           </div>
         </section>
       `
     ]
   };
 
-  function sendEmail() {
-    const subject = encodeURIComponent(document.getElementById("email-subject").value);
-    const body = encodeURIComponent(document.getElementById("email-body").value);
-    const email = "youremail@example.com"; // Replace with your real email
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-  }
-
   const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
   function buildResume() {
     const theme = getColorPalette();
     const font = fonts[Math.floor(Math.random() * fonts.length)];
-    const sections = Object.keys(layouts);
-    const included = sections.filter(() => Math.random() > 0.2); // 80% chance
+    const name = names[Math.floor(Math.random() * names.length)];
+    const img = profileImages[Math.floor(Math.random() * profileImages.length)];
+    const titleVariant = titleVariants[Math.floor(Math.random() * titleVariants.length)];
+
+    const sectionKeys = Object.keys(layouts);
+    const included = sectionKeys.filter(() => Math.random() > 0.2);
     const order = shuffle(included);
-    const html = order.map(key => {
-      const variant = layouts[key][Math.floor(Math.random() * layouts[key].length)];
-      return variant({ theme });
-    }).join("\n");
+
+    const html = [
+      titleVariant({ theme, name, img }),
+      ...order.map(key => {
+        const variant = layouts[key][Math.floor(Math.random() * layouts[key].length)];
+        return variant({ theme });
+      })
+    ].join("\n");
 
     document.getElementById("app").innerHTML = `
-      <div class="${theme.bg} ${font}">
+      <div id="resume-content" class="${theme.bg} ${font}">
         ${html}
-        <footer class="text-center py-6 text-sm ${theme.text}">&copy; 2025 Your Name</footer>
       </div>
     `;
+  }
+
+  function downloadPDF() {
+    const element = document.getElementById("resume-content");
+    html2pdf().from(element).set({
+      margin: 0.5,
+      filename: 'resume.pdf',
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    }).save();
   }
 
   buildResume();
