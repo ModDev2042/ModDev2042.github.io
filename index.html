@@ -2,164 +2,531 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Resume Sample (Reload to Change)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <title>Planes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #111;
+      --panel: #222;
+      --panel-2: #333;
+      --text: #eee;
+      --accent: #ffcc00;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--panel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--accent);
+      user-select: none;
+    }
+    .cart-btn {
+      background: var(--accent);
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      width: 95%;
+      max-width: 1200px;
+      margin: 18px auto 28px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    .card:hover { transform: translateY(-2px); background: var(--panel-2); }
+
+    .thumb {
+      width: 100%;
+      aspect-ratio: 4/3;
+      display: block;
+      border-radius: 8px;
+      background: #000;
+      overflow: hidden;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+      pointer-events: none;
+    }
+    .thumb canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .name {
+      margin: 8px 0 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .add-cart {
+      margin-top: 6px;
+      background: var(--accent);
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      align-self: stretch;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 20;
+    }
+    .overlay.active { visibility: visible; opacity: 1; }
+
+    .viewer {
+      background: #111;
+      border-radius: 12px;
+      width: min(96vw, 1200px);
+      height: min(80vh, 820px);
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      touch-action: none; /* we handle gestures */
+      position: relative;
+    }
+    .viewer-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 14px; right: 16px;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Cart Drawer */
+    .cart-drawer {
+      position: fixed;
+      right: -320px;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background: var(--panel);
+      box-shadow: -2px 0 6px rgba(0,0,0,0.7);
+      transition: right 0.3s;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    .cart-drawer.active { right: 0; }
+
+    .cart-header {
+      padding: 14px;
+      background: var(--panel-2);
+      font-weight: bold;
+      font-size: 1.05rem;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .close-cart {
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    .cart-items { flex: 1; overflow-y: auto; padding: 10px; }
+    .cart-item {
+      padding: 8px;
+      border-bottom: 1px solid #444;
+      font-size: 0.95rem;
+    }
+    .cart-footer { padding: 12px; background: var(--panel-2); text-align: center; }
+    .checkout-btn {
+      background: var(--accent);
+      border: none;
+      padding: 8px 14px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1rem; }
+      .gallery { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    }
+  </style>
 </head>
-<body id="app" class="transition-all duration-300"></body>
+<body>
+  <header>
+    <h1>Plane Models</h1>
+    <button class="cart-btn" onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
+  </header>
 
-<script>
-  const fonts = ["font-sans", "font-serif", "font-mono", "font-medium", "font-light"];
-  const colorNames = ["red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan", "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose", "gray", "zinc", "neutral", "stone"];
+  <div class="gallery">
+    <!-- Example 2D Drawing -->
+    <div class="card" data-type="image" data-src="plane1.png" data-name="Plane Drawing 1">
+      <div class="thumb"><img src="plane1.png" alt="Plane Drawing 1" draggable="false" /></div>
+      <div class="name">F/A 18 Hornet Drawing</div>
+      <button class="add-cart">Add to Cart</button>
+    </div>
 
-  const getColorPalette = () => {
-    const color = colorNames[Math.floor(Math.random() * colorNames.length)];
-    return {
-      bg: `bg-${color}-50`,
-      text: `text-${color}-900`,
-      accent: `bg-${color}-500`,
-      hover: `hover:bg-${color}-600`
-    };
-  };
+    <!-- Example 3D Model -->
+    <div class="card" data-type="stl" data-src="plane1.stl" data-name="Plane Model 1">
+      <div class="thumb"><canvas></canvas></div>
+      <div class="name">Test Cube</div>
+      <button class="add-cart">Add to Cart</button>
+    </div>
+  </div>
 
-  const profileImages = [
-    "https://randomuser.me/api/portraits/men/32.jpg",
-    "https://randomuser.me/api/portraits/women/44.jpg",
-  ];
+  <!-- Overlay -->
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="close-btn" id="overlayClose">✖</div>
+    <div id="viewer" class="viewer">
+      <div class="viewer-inner" id="viewerInner"></div>
+    </div>
+  </div>
 
-  const names = ["Jane Doe", "John Smith", "Alex Johnson", "Taylor Ray", "Morgan Lee"];
+  <!-- Cart Drawer -->
+  <div id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <div class="cart-header">
+      Your Cart
+      <span class="close-cart" onclick="toggleCart()">✖</span>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <button class="checkout-btn">Checkout (Prototype)</button>
+    </div>
+  </div>
 
-  const titleVariants = [
-    ({ theme, name, img }) => `
-      <header class="${theme.bg} ${theme.text} py-8 px-6 text-center space-y-4">
-        <img src="${img}" alt="Profile" class="mx-auto w-24 h-24 rounded-full border-4 border-white shadow" />
-        <h1 class="text-4xl font-bold">${name}</h1>
-        <p class="text-lg">Web Developer | Creative Thinker</p>
-        <button onclick="downloadPDF()" class="${theme.accent} ${theme.hover} text-white px-6 py-2 rounded-full">Download Resume</button>
-      </header>
-    `,
-    ({ theme, name, img }) => `
-      <header class="${theme.bg} ${theme.text} py-6 px-6 flex items-center justify-between max-w-4xl mx-auto">
-        <div class="flex items-center space-x-4">
-          <img src="${img}" alt="Profile" class="w-20 h-20 rounded-full shadow" />
-          <div>
-            <h1 class="text-3xl font-bold">${name}</h1>
-            <p>Full Stack Developer | Freelancer</p>
-          </div>
-        </div>
-        <button onclick="downloadPDF()" class="${theme.accent} ${theme.hover} text-white px-4 py-2 rounded">Download</button>
-      </header>
-    `,
-    ({ theme, name, img }) => `
-      <header class="${theme.bg} ${theme.text} py-10 px-6 text-center">
-        <h1 class="text-5xl font-extrabold tracking-wide">${name}</h1>
-        <p class="mt-2">Frontend Developer & UI Designer</p>
-        <img src="${img}" alt="Profile" class="mt-4 mx-auto w-20 h-20 rounded-full border border-gray-300" />
-        <button onclick="downloadPDF()" class="mt-4 ${theme.accent} ${theme.hover} text-white px-6 py-2 rounded-full">Download Resume</button>
-      </header>
-    `
-  ];
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/examples/js/controls/OrbitControls.js"></script>
 
-  const layouts = {
-    about: [
-      ({ theme }) => `
-        <section class="py-10 px-6 max-w-4xl mx-auto ${theme.text}">
-          <h2 class="text-2xl font-semibold mb-4">About Me</h2>
-          <p>Passionate web developer focused on clean code, performance, and user-centered design.</p>
-        </section>
-      `
-    ],
-    skills: [
-      ({ theme }) => `
-        <section class="py-10 px-6 bg-gray-100 ${theme.text}">
-          <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl font-semibold mb-4">Skills</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              ${["HTML", "CSS", "JavaScript", "React", "Tailwind", "Git"].map(skill =>
-                `<span class="bg-white p-3 rounded shadow text-center">${skill}</span>`).join("")}
-            </div>
-          </div>
-        </section>
-      `
-    ],
-    experience: [
-      ({ theme }) => `
-        <section class="py-10 px-6 max-w-4xl mx-auto ${theme.text}">
-          <h2 class="text-2xl font-semibold mb-4">Experience</h2>
-          <div>
-            <h3 class="text-xl font-bold">Frontend Developer - XYZ Corp</h3>
-            <p class="text-sm text-gray-500">2022 – Present</p>
-            <p class="mt-2">Built React-based UIs and improved performance by 40%.</p>
-          </div>
-        </section>
-      `
-    ],
-    projects: [
-      ({ theme }) => `
-        <section class="py-10 px-6 bg-gray-100 ${theme.text}">
-          <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl font-semibold mb-4">Projects</h2>
-            <div class="bg-white p-4 rounded shadow">
-              <h3 class="text-lg font-bold">Portfolio Website</h3>
-              <p>Modern and responsive personal portfolio built with Tailwind and React.</p>
-            </div>
-          </div>
-        </section>
-      `
-    ],
-    education: [
-      ({ theme }) => `
-        <section class="py-10 px-6 max-w-4xl mx-auto ${theme.text}">
-          <h2 class="text-2xl font-semibold mb-4">Education</h2>
-          <div>
-            <h3 class="text-xl font-bold">B.Sc. in Computer Science</h3>
-            <p class="text-sm text-gray-500">University of Example — 2018–2022</p>
-            <p class="mt-2">Graduated with honors, focused on web development and UI/UX.</p>
-          </div>
-        </section>
-      `
-    ]
-  };
+  <script>
+    const overlay = document.getElementById("overlay");
+    const viewer = document.getElementById("viewer");
+    const viewerInner = document.getElementById("viewerInner");
+    const overlayClose = document.getElementById("overlayClose");
+    const cartDrawer = document.getElementById("cartDrawer");
+    const cartCount = document.getElementById("cart-count");
+    const cartItemsEl = document.getElementById("cartItems");
+    let cart = [];
 
-  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+    function toggleCart() {
+      cartDrawer.classList.toggle("active");
+      cartDrawer.setAttribute("aria-hidden", cartDrawer.classList.contains("active") ? "false" : "true");
+    }
+    function addToCart(name) {
+      cart.push(name);
+      cartCount.textContent = cart.length;
+      renderCart();
+    }
+    function renderCart() {
+      cartItemsEl.innerHTML = "";
+      cart.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        div.textContent = item;
+        cartItemsEl.appendChild(div);
+      });
+    }
 
-  function buildResume() {
-    const theme = getColorPalette();
-    const font = fonts[Math.floor(Math.random() * fonts.length)];
-    const name = names[Math.floor(Math.random() * names.length)];
-    const img = profileImages[Math.floor(Math.random() * profileImages.length)];
-    const titleVariant = titleVariants[Math.floor(Math.random() * titleVariants.length)];
+    function openOverlay() {
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+    function closeOverlay() {
+      overlay.classList.remove("active");
+      overlay.setAttribute("aria-hidden", "true");
+      viewerInner.innerHTML = "";
+      document.body.style.overflow = "";
+    }
+    overlayClose.addEventListener("click", closeOverlay);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeOverlay(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeOverlay(); });
 
-    const sectionKeys = Object.keys(layouts);
-    const included = sectionKeys.filter(() => Math.random() > 0.2);
-    const order = shuffle(included);
+    // Cards
+    document.querySelectorAll(".card").forEach((card) => {
+      const type = card.dataset.type;
+      const src = card.dataset.src;
+      const name = card.dataset.name;
 
-    const html = [
-      titleVariant({ theme, name, img }),
-      ...order.map(key => {
-        const variant = layouts[key][Math.floor(Math.random() * layouts[key].length)];
-        return variant({ theme });
-      })
-    ].join("\n");
+      card.querySelector(".add-cart").addEventListener("click", (e) => {
+        e.stopPropagation();
+        addToCart(name);
+      });
 
-    document.getElementById("app").innerHTML = `
-      <div id="resume-content" class="${theme.bg} ${font}">
-        ${html}
-      </div>
-    `;
-  }
+      card.addEventListener("click", () => {
+        openOverlay();
+        if (type === "image") {
+          openImageViewer(src);
+        } else if (type === "stl") {
+          openSTLViewer(src);
+        }
+      });
 
-  function downloadPDF() {
-    const element = document.getElementById("resume-content");
-    html2pdf().from(element).set({
-      margin: 0.5,
-      filename: 'resume.pdf',
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    }).save();
-  }
+      // Rotating preview for STL
+      if (type === "stl") initSTLPreview(card, src);
+    });
 
-  buildResume();
-</script>
+    // Image viewer with mobile rotation (drag to rotate, pinch ignored)
+    function openImageViewer(src) {
+      // Wrapper to apply 3D rotation
+      const wrap = document.createElement("div");
+      wrap.style.width = "100%";
+      wrap.style.height = "100%";
+      wrap.style.display = "flex";
+      wrap.style.justifyContent = "center";
+      wrap.style.alignItems = "center";
+      wrap.style.perspective = "900px";
+      wrap.style.touchAction = "none";
+      wrap.style.userSelect = "none";
+
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Drawing";
+      img.style.maxWidth = "100%";
+      img.style.maxHeight = "100%";
+      img.style.transformStyle = "preserve-3d";
+      img.style.transition = "transform 0.06s linear";
+      img.setAttribute("draggable", "false");
+      img.style.webkitTouchCallout = "none";
+      wrap.appendChild(img);
+      viewerInner.appendChild(wrap);
+
+      let isDown = false;
+      let lastX = 0, lastY = 0;
+      let rotX = 0, rotY = 0;
+
+      const onPointerDown = (e) => {
+        isDown = true;
+        const p = getPoint(e);
+        lastX = p.x;
+        lastY = p.y;
+        wrap.setPointerCapture(e.pointerId);
+      };
+      const onPointerMove = (e) => {
+        if (!isDown) return;
+        const p = getPoint(e);
+        const dx = p.x - lastX;
+        const dy = p.y - lastY;
+        lastX = p.x; lastY = p.y;
+        rotY += dx * 0.2;
+        rotX -= dy * 0.2;
+        rotX = Math.max(-45, Math.min(45, rotX));
+        rotY = Math.max(-45, Math.min(45, rotY));
+        img.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      };
+      const onPointerUp = (e) => { isDown = false; wrap.releasePointerCapture(e.pointerId); };
+
+      wrap.addEventListener("pointerdown", onPointerDown, { passive: true });
+      wrap.addEventListener("pointermove", onPointerMove, { passive: true });
+      wrap.addEventListener("pointerup", onPointerUp, { passive: true });
+      wrap.addEventListener("pointercancel", onPointerUp, { passive: true });
+
+      function getPoint(e) {
+        return { x: e.clientX, y: e.clientY };
+      }
+    }
+
+    // STL viewer with OrbitControls (touch rotate + pinch zoom) and auto-fit
+    function openSTLViewer(src) {
+      const container = document.createElement("div");
+      container.style.width = "100%";
+      container.style.height = "100%";
+      viewerInner.appendChild(container);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x111111);
+
+      const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 5000);
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      container.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.1;
+      controls.enablePan = false;
+      controls.enableZoom = true;
+      renderer.domElement.style.touchAction = "none";
+
+      const hemi = new THREE.HemisphereLight(0xffffff, 0x222233, 1.0);
+      scene.add(hemi);
+      const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+      dir.position.set(5, 6, 8);
+      scene.add(dir);
+
+      const loader = new THREE.STLLoader();
+      loader.load(
+        src,
+        (geometry) => {
+          const mat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.2, roughness: 0.8 });
+          const mesh = new THREE.Mesh(geometry, mat);
+          geometry.computeBoundingBox();
+          geometry.computeBoundingSphere();
+
+          // Center geometry at origin
+          geometry.center();
+          scene.add(mesh);
+
+          // Fit camera to object
+          const bbox = geometry.boundingBox;
+          const size = new THREE.Vector3();
+          bbox.getSize(size);
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const fov = camera.fov * (Math.PI / 180);
+          let camZ = (maxDim / 2) / Math.tan(fov / 2);
+          camZ *= 1.5; // pad a bit
+          camera.position.set(0, 0, camZ);
+          controls.target.set(0, 0, 0);
+          controls.update();
+
+          onResize();
+          animate();
+        },
+        undefined,
+        (err) => {
+          const m = document.createElement("div");
+          m.style.color = "#f66";
+          m.textContent = "Failed to load STL. Make sure you are serving files from a local web server and the path is correct.";
+          m.style.padding = "8px";
+          container.appendChild(m);
+          console.error("STL load error", err);
+          onResize();
+          animate();
+        }
+      );
+
+      function onResize() {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (w === 0 || h === 0) return;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h, false);
+      }
+      const ro = new ResizeObserver(onResize);
+      ro.observe(container);
+      window.addEventListener("resize", onResize);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    }
+
+    // Small rotating STL thumbnail in the card
+    function initSTLPreview(card, src) {
+      const canvas = card.querySelector("canvas");
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(60, 4/3, 0.1, 2000);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5, 5, 5);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x404040));
+
+      const loader = new THREE.STLLoader();
+      loader.load(src, (geometry) => {
+        const material = new THREE.MeshStandardMaterial({ color: 0xffcc00, metalness: 0.2, roughness: 0.8 });
+        const mesh = new THREE.Mesh(geometry, material);
+        geometry.center();
+        geometry.computeBoundingBox();
+        const size = new THREE.Vector3();
+        geometry.boundingBox.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const dist = maxDim * 1.6;
+        camera.position.set(0, 0, dist);
+        scene.add(mesh);
+
+        function resizePreview() {
+          const w = canvas.clientWidth;
+          const h = canvas.clientHeight;
+          if (w === 0 || h === 0) return;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h, false);
+        }
+        const ro = new ResizeObserver(resizePreview);
+        ro.observe(canvas);
+        resizePreview();
+
+        function animate() {
+          requestAnimationFrame(animate);
+          mesh.rotation.y += 0.01;
+          renderer.render(scene, camera);
+        }
+        animate();
+      });
+    }
+
+    // Download/interaction restrictions (best-effort)
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "F11" || (e.ctrlKey && (e.key.toLowerCase() === "s" || e.key.toLowerCase() === "p"))) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
 </html>
