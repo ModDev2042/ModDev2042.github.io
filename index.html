@@ -1,148 +1,1053 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DESERT STORM — Hi8 Camcorder Effect</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mainm Education Solutions — Enterprise EdTech Integration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy-mid: #111e35;
+  --navy-light: #1e3460;
+  --gold: #c8922a;
+  --gold-light: #e8b04a;
+  --cream: #f8f5ef;
+  --cream-dark: #ede8de;
+  --white: #ffffff;
+  --text: #1a1a2e;
+  --text-mid: #4a4a6a;
+  --text-light: #8a8aaa;
+  --border: rgba(200,146,42,0.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+
+/* ─── NAV ─────────────────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:70px;padding:0 5vw;display:flex;align-items:center;justify-content:space-between;background:rgba(10,22,40,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.nav-logo-mark{width:34px;height:34px;border-radius:8px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--navy)}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:#fff;letter-spacing:.01em}
+.nav-logo-text span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:2.2rem}
+.nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.84rem;font-weight:500;letter-spacing:.02em;transition:color .2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--gold-light)}
+.nav-cta{padding:.45rem 1.2rem;border-radius:6px;background:var(--gold);color:var(--navy) !important;font-weight:600 !important;font-size:.78rem !important;letter-spacing:.04em !important;text-transform:uppercase;transition:background .2s !important}
+.nav-cta:hover{background:var(--gold-light) !important}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ─── PAGE SYSTEM ─────────────────────────────────────────────── */
+.page{display:none;min-height:100vh;padding-top:70px}
+.page.active{display:block}
+
+/* ─── SHARED ──────────────────────────────────────────────────── */
+.section{padding:6rem 5vw}
+.section-inner{max-width:1200px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--gold);display:block}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3vw,2.9rem);font-weight:700;line-height:1.18;margin-bottom:1rem}
+.section-title.light{color:#fff}
+.section-sub{font-size:.98rem;line-height:1.85;color:var(--text-mid);max-width:580px;font-weight:300}
+.section-sub.light{color:rgba(255,255,255,.52)}
+.btn-gold{display:inline-flex;align-items:center;gap:8px;padding:.8rem 1.9rem;border-radius:6px;background:var(--gold);color:var(--navy);font-weight:600;font-size:.85rem;letter-spacing:.03em;text-decoration:none;border:none;cursor:pointer;transition:background .2s,transform .15s}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:.8rem 1.9rem;border-radius:6px;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.8);font-weight:500;font-size:.85rem;text-decoration:none;cursor:pointer;background:transparent;transition:border-color .2s,color .2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:none}
+.dark-section{background:var(--navy)}
+.mid-section{background:var(--navy-mid)}
+.light-section{background:var(--cream)}
+.off-section{background:var(--cream-dark)}
+
+/* ─── HOME ────────────────────────────────────────────────────── */
+/* Hero */
+.hero{min-height:100vh;background:var(--navy);position:relative;overflow:hidden;display:flex;align-items:center;padding:0 5vw}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 75% 60% at 68% 50%,rgba(30,52,96,.85) 0%,transparent 70%),radial-gradient(ellipse 40% 35% at 15% 80%,rgba(200,146,42,.1) 0%,transparent 60%)}
+.hero-grid{position:absolute;inset:0;opacity:.035;background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);background-size:60px 60px}
+.hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:7rem 0}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:.35rem .9rem;border-radius:9999px;border:1px solid var(--border);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:1.8rem}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,4.2vw,3.8rem);font-weight:700;line-height:1.12;color:#fff;margin-bottom:1.5rem;letter-spacing:-.01em}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:1.02rem;line-height:1.82;color:rgba(255,255,255,.55);max-width:480px;margin-bottom:2.5rem;font-weight:300}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-visual{display:flex;flex-direction:column;gap:14px;position:relative}
+.hero-img-big{border-radius:12px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--border)}
+.hero-img-big img{width:100%;height:100%;object-fit:cover;filter:brightness(.88) saturate(.8)}
+.hero-img-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hero-img-sm{border-radius:9px;overflow:hidden;aspect-ratio:3/2;border:1px solid rgba(200,146,42,.12)}
+.hero-img-sm img{width:100%;height:100%;object-fit:cover;filter:brightness(.82) saturate(.75)}
+.hero-float{position:absolute;bottom:-10px;left:-20px;background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border:1px solid rgba(200,146,42,.28);border-radius:10px;padding:12px 16px;z-index:3}
+.hero-float-num{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--gold);line-height:1}
+.hero-float-lbl{font-size:.65rem;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr}.hero-visual{display:none}}
+
+/* Stats row */
+.stats-row{background:var(--navy-mid);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2.2rem 5vw}
+.stats-row-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center}
+.stat-n{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gold);line-height:1}
+.stat-l{font-size:.7rem;color:rgba(255,255,255,.38);letter-spacing:.08em;text-transform:uppercase;margin-top:5px}
+@media(max-width:600px){.stats-row-inner{grid-template-columns:repeat(2,1fr)}}
+
+/* Home feature grid */
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.feature-card{background:#fff;border:1px solid var(--cream-dark);border-radius:12px;padding:2rem;position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.feature-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.feature-card:hover{box-shadow:0 8px 40px rgba(10,22,40,.1);transform:translateY(-2px)}
+.feature-card:hover::after{transform:scaleX(1)}
+.feature-icon{width:42px;height:42px;border-radius:10px;background:rgba(200,146,42,.1);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:1.2rem}
+.feature-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--navy);margin-bottom:.55rem}
+.feature-card p{font-size:.85rem;color:var(--text-mid);line-height:1.72;font-weight:300}
+@media(max-width:900px){.feature-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
+
+/* Logos / trusted by */
+.logos-section{background:var(--cream-dark);padding:3rem 5vw;border-top:1px solid rgba(0,0,0,.05)}
+.logos-inner{max-width:1200px;margin:0 auto;text-align:center}
+.logos-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-light);margin-bottom:1.8rem}
+.logos-row{display:flex;align-items:center;justify-content:center;gap:3rem;flex-wrap:wrap}
+.logo-pill{padding:.5rem 1.4rem;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-weight:600;color:var(--text-mid);letter-spacing:.04em;background:#fff}
+
+/* Home testimonials */
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.tcard{background:rgba(255,255,255,.05);border:1px solid rgba(200,146,42,.12);border-radius:12px;padding:1.75rem}
+.tcard-quote{font-size:.9rem;line-height:1.78;color:rgba(255,255,255,.6);font-weight:300;font-style:italic;margin-bottom:1.25rem}
+.tcard-author{display:flex;align-items:center;gap:10px}
+.tcard-avatar{width:36px;height:36px;border-radius:50%;background:rgba(200,146,42,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--gold)}
+.tcard-name{font-size:.82rem;font-weight:600;color:rgba(255,255,255,.8)}
+.tcard-title{font-size:.72rem;color:rgba(255,255,255,.35);margin-top:1px}
+@media(max-width:900px){.testimonials-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.testimonials-grid{grid-template-columns:1fr}}
+
+/* CTA Banner */
+.cta-banner{background:linear-gradient(135deg,var(--navy-light) 0%,var(--navy) 100%);border:1px solid var(--border);border-radius:16px;padding:3.5rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-top:4rem}
+.cta-banner h3{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:#fff;margin-bottom:.5rem}
+.cta-banner p{font-size:.9rem;color:rgba(255,255,255,.5);font-weight:300;max-width:420px}
+
+/* ─── SOLUTIONS PAGE ──────────────────────────────────────────── */
+.sol-hero{background:var(--navy);padding:5rem 5vw 4rem;border-bottom:1px solid var(--border)}
+.sol-hero-inner{max-width:1200px;margin:0 auto}
+.sol-hero p{font-size:1.05rem;color:rgba(255,255,255,.5);line-height:1.85;max-width:640px;font-weight:300;margin-top:1rem}
+
+.sol-nav{background:var(--navy-mid);border-bottom:1px solid var(--border);padding:.8rem 5vw;position:sticky;top:70px;z-index:50}
+.sol-nav-inner{max-width:1200px;margin:0 auto;display:flex;gap:2rem;overflow-x:auto}
+.sol-nav a{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;white-space:nowrap;padding:.3rem 0;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;cursor:pointer}
+.sol-nav a:hover,.sol-nav a.active{color:var(--gold);border-color:var(--gold)}
+
+.sol-section{padding:5rem 5vw}
+.sol-section:nth-child(even){background:var(--cream-dark)}
+.sol-section:nth-child(odd){background:var(--cream)}
+.sol-section-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.sol-section-inner.flip{direction:rtl}
+.sol-section-inner.flip>*{direction:ltr}
+.sol-img{border-radius:12px;overflow:hidden;aspect-ratio:16/10;border:1px solid rgba(0,0,0,.08)}
+.sol-img img{width:100%;height:100%;object-fit:cover;filter:saturate(.85)}
+.sol-tag{display:inline-block;padding:.25rem .7rem;border-radius:9999px;background:rgba(200,146,42,.12);color:var(--gold);font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.8rem}
+.sol-section h2{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,2.5vw,2.2rem);font-weight:700;color:var(--navy);line-height:1.2;margin-bottom:1rem}
+.sol-section p{font-size:.9rem;color:var(--text-mid);line-height:1.82;font-weight:300;margin-bottom:.8rem}
+.sol-bullets{display:flex;flex-direction:column;gap:.55rem;margin-top:1.2rem}
+.sol-bullet{display:flex;align-items:flex-start;gap:10px;font-size:.85rem;color:var(--text-mid);font-weight:300}
+.sol-bullet-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:7px}
+@media(max-width:900px){.sol-section-inner{grid-template-columns:1fr}.sol-section-inner.flip{direction:ltr}.sol-img{aspect-ratio:16/7}}
+
+.sol-pricing{background:var(--navy);padding:5rem 5vw}
+.sol-pricing-inner{max-width:1200px;margin:0 auto}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.pricing-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,146,42,.15);border-radius:14px;padding:2rem;transition:border-color .2s,background .2s}
+.pricing-card.featured{background:rgba(200,146,42,.08);border-color:rgba(200,146,42,.4)}
+.pricing-tier{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.pricing-price{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#fff;line-height:1;margin-bottom:.4rem}
+.pricing-price span{font-size:.9rem;font-weight:300;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif}
+.pricing-desc{font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:1.5rem;line-height:1.6}
+.pricing-feats{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem}
+.pricing-feat{display:flex;align-items:center;gap:8px;font-size:.82rem;color:rgba(255,255,255,.6)}
+.pricing-feat svg{flex-shrink:0;color:var(--gold)}
+@media(max-width:768px){.pricing-grid{grid-template-columns:1fr}}
+
+/* ─── ABOUT PAGE ──────────────────────────────────────────────── */
+.about-hero{background:var(--navy);padding:5rem 5vw 4rem}
+.about-hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.about-hero p{font-size:1rem;color:rgba(255,255,255,.52);line-height:1.85;font-weight:300;margin-top:1rem;max-width:480px}
+.about-hero-img{border-radius:12px;overflow:hidden;aspect-ratio:16/10;border:1px solid var(--border)}
+.about-hero-img img{width:100%;height:100%;object-fit:cover;filter:brightness(.85) saturate(.78)}
+@media(max-width:900px){.about-hero-inner{grid-template-columns:1fr}.about-hero-img{display:none}}
+
+.mission-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.mission-card{background:#fff;border:1px solid var(--cream-dark);border-radius:12px;padding:1.75rem;border-top:3px solid var(--gold)}
+.mission-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--navy);margin-bottom:.6rem}
+.mission-card p{font-size:.85rem;color:var(--text-mid);line-height:1.72;font-weight:300}
+@media(max-width:768px){.mission-grid{grid-template-columns:1fr}}
+
+.history-timeline{margin-top:3.5rem;position:relative}
+.history-timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),transparent)}
+.timeline-item{display:grid;grid-template-columns:120px 1fr;gap:2rem;padding:0 0 3rem 2.5rem;position:relative}
+.timeline-item::before{content:'';position:absolute;left:-.4rem;top:.35rem;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.timeline-year{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--gold);line-height:1;padding-top:.2rem}
+.timeline-content h4{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:.4rem}
+.timeline-content p{font-size:.85rem;color:rgba(255,255,255,.45);line-height:1.75;font-weight:300}
+
+.values-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;margin-top:3rem}
+.value-card{display:flex;gap:1rem;padding:1.4rem;background:rgba(255,255,255,.04);border:1px solid rgba(200,146,42,.1);border-radius:10px}
+.value-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:rgba(200,146,42,.3);line-height:1;flex-shrink:0}
+.value-card h4{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:.35rem}
+.value-card p{font-size:.82rem;color:rgba(255,255,255,.4);line-height:1.7;font-weight:300}
+@media(max-width:700px){.values-grid{grid-template-columns:1fr}}
+
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.team-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s}
+.team-card:hover{box-shadow:0 8px 32px rgba(10,22,40,.1);transform:translateY(-2px)}
+.team-img-wrap{aspect-ratio:1;overflow:hidden}
+.team-img-wrap img{width:100%;height:100%;object-fit:cover;filter:saturate(.72);transition:filter .3s}
+.team-card:hover .team-img-wrap img{filter:saturate(1)}
+.team-info{padding:1.2rem 1.2rem 1.5rem}
+.team-name{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;color:var(--navy)}
+.team-role{font-size:.7rem;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;font-weight:600;margin-top:2px}
+.team-bio{font-size:.78rem;color:var(--text-mid);line-height:1.65;margin-top:.7rem;font-weight:300}
+@media(max-width:900px){.team-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.team-grid{grid-template-columns:1fr}}
+
+.partners-logos{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.partner-card{background:#fff;border:1px solid var(--cream-dark);border-radius:10px;padding:1.25rem;text-align:center}
+.partner-name{font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:.3rem;letter-spacing:.03em}
+.partner-desc{font-size:.72rem;color:var(--text-light);line-height:1.5}
+@media(max-width:768px){.partners-logos{grid-template-columns:repeat(2,1fr)}}
+
+/* ─── CONTACT PAGE ────────────────────────────────────────────── */
+.contact-hero{background:var(--navy);padding:5rem 5vw 4rem;border-bottom:1px solid var(--border)}
+.contact-hero-inner{max-width:1200px;margin:0 auto}
+.contact-hero p{font-size:1rem;color:rgba(255,255,255,.5);line-height:1.85;max-width:560px;font-weight:300;margin-top:1rem}
+
+.contact-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:4rem;margin-top:3.5rem}
+.contact-info-block{display:flex;flex-direction:column;gap:1.5rem}
+.contact-card{background:rgba(255,255,255,.04);border:1px solid rgba(200,146,42,.14);border-radius:12px;padding:1.5rem}
+.contact-card-icon{width:38px;height:38px;border-radius:8px;background:rgba(200,146,42,.12);border:1px solid rgba(200,146,42,.2);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:1rem}
+.contact-card h4{font-size:.85rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:.35rem}
+.contact-card p{font-size:.8rem;color:rgba(255,255,255,.4);line-height:1.65;font-weight:300}
+.contact-card a{color:var(--gold);text-decoration:none}
+.contact-card a:hover{text-decoration:underline}
+
+.contact-form-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(200,146,42,.14);border-radius:14px;padding:2.25rem}
+.form-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;color:#fff;margin-bottom:.4rem}
+.form-sub{font-size:.82rem;color:rgba(255,255,255,.38);margin-bottom:2rem;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.68rem .9rem;color:rgba(255,255,255,.82);font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(200,146,42,.5)}
+.form-group select option{background:var(--navy-mid)}
+.form-group textarea{resize:vertical;min-height:110px}
+.form-submit{width:100%;padding:.9rem;border:none;border-radius:6px;background:var(--gold);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s}
+.form-submit:hover{background:var(--gold-light);transform:translateY(-1px)}
+.form-note{font-size:.72rem;color:rgba(255,255,255,.22);text-align:center;margin-top:.75rem}
+@media(max-width:900px){.contact-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+
+.offices-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.office-card{background:#fff;border:1px solid var(--cream-dark);border-radius:12px;padding:1.5rem;border-top:3px solid var(--gold)}
+.office-city{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--navy);margin-bottom:.35rem}
+.office-type{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.75rem}
+.office-detail{font-size:.8rem;color:var(--text-mid);line-height:1.7;font-weight:300}
+@media(max-width:768px){.offices-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.offices-grid{grid-template-columns:1fr}}
+
+/* ─── FOOTER ──────────────────────────────────────────────────── */
+footer{background:var(--navy);border-top:1px solid var(--border);padding:3.5rem 5vw 2rem}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.footer-brand p{font-size:.82rem;color:rgba(255,255,255,.35);line-height:1.75;font-weight:300;margin-top:.75rem;max-width:260px}
+.footer-col h5{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1rem}
+.footer-col a{display:block;font-size:.82rem;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:.5rem;transition:color .2s;cursor:pointer}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-copy{font-size:.75rem;color:rgba(255,255,255,.2)}
+.footer-legal{display:flex;gap:1.5rem}
+.footer-legal a{font-size:.75rem;color:rgba(255,255,255,.2);text-decoration:none;transition:color .2s;cursor:pointer}
+.footer-legal a:hover{color:var(--gold)}
+@media(max-width:768px){.footer-top{grid-template-columns:1fr 1fr}.footer-bottom{flex-direction:column;text-align:center}}
+@media(max-width:500px){.footer-top{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
-<div class="scanline-overlay"></div>
-<div class="noise-overlay"></div>
-
-<header>
-  <div class="header-left">
-    <div class="rec-dot"></div>
-    <span class="rec-label">REC</span>
+<!-- ═══ NAV ═══════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nav-logo-mark">M</div>
+    <span class="nav-logo-text">Mainm <span>Education</span></span>
   </div>
-  <div class="header-title">
-    <span class="title-main">DESERT STORM</span>
-    <span class="title-sub">Hi8 · CAMCORDER · EFFECT PROCESSOR</span>
+  <div class="nav-links">
+    <a onclick="showPage('home')" id="nav-home" class="active">Home</a>
+    <a onclick="showPage('solutions')" id="nav-solutions">Solutions</a>
+    <a onclick="showPage('about')" id="nav-about">About</a>
+    <a onclick="showPage('contact')" id="nav-contact" class="nav-cta">Contact Us</a>
   </div>
-  <div class="header-right">
-    <span class="timestamp" id="ts">02. 08. 90 &nbsp; 10:44:00</span>
-  </div>
-</header>
+</nav>
 
-<main>
+<!-- ═══ HOME PAGE ═══════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
 
-  <!-- DROP ZONE -->
-  <section class="drop-zone" id="dropZone">
-    <div class="drop-inner">
-      <div class="drop-icon">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <rect x="6" y="10" width="36" height="28" rx="2" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="32" cy="18" r="3" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M6 30 L16 22 L24 28 L32 22 L42 30" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M24 42 L24 36 M20 39 L24 43 L28 39" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <p class="drop-title">DROP IMAGE OR VIDEO HERE</p>
-      <p class="drop-sub">JPG · PNG · MP4 · MOV · WEBM</p>
-      <label class="btn-upload" for="fileInput">SELECT FILE</label>
-      <input type="file" id="fileInput" accept="image/*,video/*" hidden>
-    </div>
-  </section>
-
-  <!-- WORKSPACE -->
-  <section class="workspace" id="workspace" style="display:none">
-    <div class="canvas-wrap">
-      <canvas id="outputCanvas"></canvas>
-      <div class="canvas-hud">
-        <span class="hud-left">Hi8 · SP MODE</span>
-        <span class="hud-right" id="hudTime">02. 08. 90 &nbsp; 10:44:00</span>
-      </div>
-      <!-- video playback controls -->
-      <div class="video-controls" id="videoControls" style="display:none">
-        <button id="btnPlayPause" class="vc-btn">▶ PLAY</button>
-        <div class="vc-progress">
-          <div class="vc-bar" id="vcBar"></div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge"><div class="hero-badge-dot"></div> Schoology Certified Integration Partner</div>
+        <h1>The Infrastructure<br>Layer for <em>Modern</em><br>K–12 Districts</h1>
+        <p class="hero-sub">Mainm Education Solutions architects the connective tissue between your district's learning management systems, student information platforms, and operational workflows — eliminating data silos and unlocking institutional intelligence at scale.</p>
+        <div class="hero-actions">
+          <button class="btn-gold" onclick="showPage('solutions')">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Explore Solutions
+          </button>
+          <button class="btn-ghost" onclick="showPage('contact')">Schedule a Demo</button>
         </div>
-        <span class="vc-time" id="vcTime">0:00</span>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-img-big">
+          <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80&auto=format&fit=crop" alt="Students in modern classroom"/>
+        </div>
+        <div class="hero-img-row">
+          <div class="hero-img-sm"><img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&q=80&auto=format&fit=crop" alt="Campus"/></div>
+          <div class="hero-img-sm"><img src="https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=500&q=80&auto=format&fit=crop" alt="EdTech"/></div>
+        </div>
+        <div class="hero-float">
+          <div class="hero-float-num">1M+</div>
+          <div class="hero-float-lbl">Students on platform</div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="controls-panel">
-      <div class="controls-header">
-        <span>TAPE PARAMETERS</span>
-        <button class="btn-reset" id="btnReset">RESET</button>
-      </div>
-
-      <div class="sliders">
-        <div class="slider-row">
-          <label>ORANGE CAST</label>
-          <input type="range" id="orange" min="0" max="100" value="75">
-          <span class="sv" id="sv-orange">75</span>
-        </div>
-        <div class="slider-row">
-          <label>BLOWN HIGHLIGHTS</label>
-          <input type="range" id="blown" min="0" max="100" value="60">
-          <span class="sv" id="sv-blown">60</span>
-        </div>
-        <div class="slider-row">
-          <label>LIFTED BLACKS</label>
-          <input type="range" id="lift" min="0" max="100" value="55">
-          <span class="sv" id="sv-lift">55</span>
-        </div>
-        <div class="slider-row">
-          <label>CHROMA SMEAR</label>
-          <input type="range" id="smear" min="0" max="100" value="45">
-          <span class="sv" id="sv-smear">45</span>
-        </div>
-        <div class="slider-row">
-          <label>TAPE NOISE</label>
-          <input type="range" id="noise" min="0" max="100" value="35">
-          <span class="sv" id="sv-noise">35</span>
-        </div>
-        <div class="slider-row">
-          <label>GENERATION LOSS</label>
-          <input type="range" id="genloss" min="0" max="100" value="40">
-          <span class="sv" id="sv-genloss">40</span>
-        </div>
-        <div class="slider-row">
-          <label>LENS BLUR</label>
-          <input type="range" id="blur" min="0" max="100" value="40">
-          <span class="sv" id="sv-blur">40</span>
-        </div>
-        <div class="slider-row">
-          <label>CAMERA SHAKE</label>
-          <input type="range" id="shake" min="0" max="100" value="25">
-          <span class="sv" id="sv-shake">25</span>
-        </div>
-        <div class="slider-row">
-          <label>VIGNETTE</label>
-          <input type="range" id="vignette" min="0" max="100" value="35">
-          <span class="sv" id="sv-vignette">35</span>
-        </div>
-      </div>
-
-      <div class="presets">
-        <span class="presets-label">PRESETS</span>
-        <button class="preset-btn" data-preset="gulf">GULF WAR</button>
-        <button class="preset-btn" data-preset="mild">MILD TAPE</button>
-        <button class="preset-btn" data-preset="heavy">HEAVY DUB</button>
-        <button class="preset-btn" data-preset="clean">CLEAN Hi8</button>
-      </div>
-
-      <div class="actions">
-        <button class="btn-export" id="btnExport">EXPORT FRAME</button>
-        <button class="btn-new" id="btnNew">LOAD NEW FILE</button>
-      </div>
-
-      <div class="export-status" id="exportStatus"></div>
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stats-row-inner">
+      <div class="reveal"><div class="stat-n">500+</div><div class="stat-l">Schools Served</div></div>
+      <div class="reveal"><div class="stat-n">40+</div><div class="stat-l">Districts Integrated</div></div>
+      <div class="reveal"><div class="stat-n">1M+</div><div class="stat-l">Students Reached</div></div>
+      <div class="reveal"><div class="stat-n">99.9%</div><div class="stat-l">Platform Uptime SLA</div></div>
     </div>
-  </section>
+  </div>
 
-</main>
+  <!-- Features -->
+  <div class="section light-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Platform Capabilities</div>
+        <h2 class="section-title">End-to-End EdTech<br>Integration Architecture</h2>
+        <p class="section-sub">From API authentication and data normalization to real-time event streaming and custom student applications — Mainm delivers the full stack.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+          <h3>LMS API Integration</h3>
+          <p>Certified integrations with Schoology, Canvas, Blackboard, and Moodle. Bidirectional grade sync, roster automation, and cross-platform SSO delivered through hardened OAuth 2.0 flows.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+          <h3>SIS Data Pipelines</h3>
+          <p>Automated synchronization with PowerSchool, Infinite Campus, and Skyward — delivering normalized student, enrollment, and attendance records with sub-minute latency.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <h3>District Analytics</h3>
+          <p>Unified dashboards aggregating academic performance, attendance trends, and equity metrics across every school in the district — with role-based access controls.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Compliance & Privacy</h3>
+          <p>FERPA, COPPA, and state-level student data privacy compliance baked into every layer. Data residency guarantees, audit logging, and third-party security attestations available.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+          <h3>Student Applications</h3>
+          <p>Progressive web apps purpose-built for how students actually use their devices — real-time schedules, grade visibility, and campus resources in a single authenticated experience.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          <h3>Managed Implementation</h3>
+          <p>Dedicated implementation engineers own the full deployment lifecycle — discovery, configuration, testing, go-live, and ongoing incident response — so your IT team stays focused.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Logos -->
+  <div class="logos-section">
+    <div class="logos-inner">
+      <div class="logos-label">Integrated with the platforms your district already uses</div>
+      <div class="logos-row">
+        <div class="logo-pill">Schoology</div>
+        <div class="logo-pill">PowerSchool</div>
+        <div class="logo-pill">Canvas LMS</div>
+        <div class="logo-pill">Infinite Campus</div>
+        <div class="logo-pill">Skyward</div>
+        <div class="logo-pill">Google Workspace</div>
+        <div class="logo-pill">Microsoft 365</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="section dark-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Client Outcomes</div>
+        <h2 class="section-title light">What District Leaders Say</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="tcard reveal">
+          <p class="tcard-quote">"Mainm's Schoology integration eliminated 14 hours of manual grade reconciliation per week across our secondary schools. The ROI was evident within the first grading period."</p>
+          <div class="tcard-author">
+            <div class="tcard-avatar">DT</div>
+            <div><div class="tcard-name">Dr. Tracy Holloway</div><div class="tcard-title">Deputy Superintendent, Westfield USD</div></div>
+          </div>
+        </div>
+        <div class="tcard reveal">
+          <p class="tcard-quote">"The compliance framework Mainm built for us gave our board complete confidence that we were meeting all FERPA obligations — documented, auditable, and defensible."</p>
+          <div class="tcard-author">
+            <div class="tcard-avatar">MR</div>
+            <div><div class="tcard-name">Marcus Reyes</div><div class="tcard-title">Director of Technology, Lakewood City Schools</div></div>
+          </div>
+        </div>
+        <div class="tcard reveal">
+          <p class="tcard-quote">"We'd been told for years that connecting our SIS to Canvas at that level was impossible. Mainm delivered it in six weeks. The implementation team was exceptional."</p>
+          <div class="tcard-author">
+            <div class="tcard-avatar">PK</div>
+            <div><div class="tcard-name">Patricia Kwan</div><div class="tcard-title">CTO, Northeast Regional School District</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="cta-banner reveal">
+        <div><h3>Ready to eliminate your data silos?</h3><p>Schedule a 30-minute discovery call with our solutions team. We'll map your current stack and identify integration opportunities within the first conversation.</p></div>
+        <button class="btn-gold" onclick="showPage('contact')">Book a Discovery Call</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /home -->
+
+
+<!-- ═══ SOLUTIONS PAGE ══════════════════════════════════════════ -->
+<div id="page-solutions" class="page">
+
+  <div class="sol-hero">
+    <div class="sol-hero-inner">
+      <div class="eyebrow reveal">Our Platform</div>
+      <h1 class="section-title light reveal" style="max-width:700px">Integrated Solutions for Every Layer of District Technology</h1>
+      <p class="reveal">Mainm delivers purpose-built integration infrastructure across the full spectrum of K–12 technology operations — from learning management and student information systems to compliance, analytics, and student-facing applications. Each solution is engineered for production scale, configured for your specific environment, and supported by a dedicated team.</p>
+    </div>
+  </div>
+
+  <div class="sol-nav">
+    <div class="sol-nav-inner">
+      <a href="#lms">LMS Integration</a>
+      <a href="#sis">SIS Pipelines</a>
+      <a href="#analytics">Analytics</a>
+      <a href="#compliance">Compliance</a>
+      <a href="#apps">Student Apps</a>
+      <a href="#implementation">Implementation</a>
+    </div>
+  </div>
+
+  <!-- LMS -->
+  <div class="sol-section" id="lms">
+    <div class="sol-section-inner">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80&auto=format&fit=crop" alt="LMS Integration"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">LMS Integration</div>
+        <h2>Enterprise-Grade Learning Management System Connectivity</h2>
+        <p>Modern districts operate across multiple LMS platforms simultaneously — a legacy reality that creates grade discrepancies, enrollment gaps, and administrative overhead that compounds every semester. Mainm's LMS integration layer resolves this by establishing authoritative, bidirectional data flows between your platforms and your source-of-truth SIS.</p>
+        <p>We hold official Schoology developer credentials and maintain active integrations with Canvas, Blackboard Learn, and Moodle — each built to the platform's native API specification rather than fragile screen-scraping approaches that break with every platform update.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Certified Schoology REST API integration with three-legged OAuth and webhook event processing</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Automated roster provisioning synchronized to SIS enrollment changes within 60 seconds</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Bidirectional grade passback compliant with IMS Global LTI 1.3 and AGS specifications</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Cross-LMS SSO federation via SAML 2.0 and OIDC for unified authentication experiences</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>99.9% uptime SLA with automated failover and real-time integration health monitoring</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIS -->
+  <div class="sol-section" id="sis">
+    <div class="sol-section-inner flip">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80&auto=format&fit=crop" alt="Data pipelines"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">SIS Pipelines</div>
+        <h2>Student Information System Data Architecture at District Scale</h2>
+        <p>Your student information system is the authoritative record of enrollment, demographics, scheduling, and academic history — but extracting reliable, timely data from it has historically required custom scripting, manual exports, and error-prone reconciliation processes that consume IT capacity and introduce risk.</p>
+        <p>Mainm replaces this fragile infrastructure with production-grade data pipelines that connect PowerSchool, Infinite Campus, and Skyward to downstream systems with documented schemas, automated error handling, and end-to-end observability.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Native PowerSchool plugin architecture for direct database-adjacent access without polling overhead</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Infinite Campus REST API integration covering enrollment, grades, attendance, and scheduling domains</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Ed-Fi ODS/API compliance for districts participating in state longitudinal data system reporting</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Automated data quality validation with configurable anomaly detection and administrator alerting</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Full historical data migration services for districts transitioning between SIS platforms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics -->
+  <div class="sol-section" id="analytics">
+    <div class="sol-section-inner">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80&auto=format&fit=crop" alt="Analytics dashboard"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">District Analytics</div>
+        <h2>Institutional Intelligence That Drives Instructional Decisions</h2>
+        <p>The data your district generates every day — attendance patterns, grade distributions, course completion rates, demographic equity gaps — contains actionable intelligence that remains invisible when it lives in disconnected systems accessible only to IT administrators.</p>
+        <p>Mainm's analytics layer aggregates, normalizes, and surfaces this intelligence through role-appropriate dashboards that give principals, curriculum directors, and district administrators the visibility to make data-informed decisions without submitting IT tickets.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>District-wide academic performance dashboards with drill-down to school, grade, course, and student level</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Chronic absenteeism early-warning system with configurable threshold alerts and intervention workflows</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Equity analytics surfacing achievement and opportunity gaps across demographic and program subgroups</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Longitudinal cohort tracking for multi-year outcome analysis and college/career readiness indicators</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Automated state and federal reporting data preparation reducing manual compilation by up to 80%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compliance -->
+  <div class="sol-section" id="compliance">
+    <div class="sol-section-inner flip">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&auto=format&fit=crop" alt="Compliance"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">Data Privacy & Compliance</div>
+        <h2>Student Data Protection as Foundational Infrastructure</h2>
+        <p>Student data privacy is not a feature to be added after the fact — it is an architectural constraint that must be encoded into every data flow, access control, and third-party relationship from the outset. Mainm's compliance framework treats FERPA, COPPA, and applicable state student privacy laws as first-class engineering requirements, not legal checkboxes.</p>
+        <p>We maintain a continuously updated inventory of every student data element flowing through our integrations, enforce purpose-limitation controls that prevent unauthorized secondary use, and produce the audit documentation your board, legal counsel, and state education agency need.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Comprehensive student data inventory with automated lineage tracking across all integration points</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Purpose-limitation enforcement preventing student PII from reaching unauthorized third-party endpoints</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>SOC 2 Type II aligned security controls with annual third-party penetration testing</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>State Student Data Privacy Consortium (SDPC) agreement templates for all vendor relationships</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Incident response plan and breach notification procedures meeting all applicable regulatory timelines</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Apps -->
+  <div class="sol-section" id="apps">
+    <div class="sol-section-inner">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80&auto=format&fit=crop" alt="Student applications"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">Student-Facing Applications</div>
+        <h2>Purpose-Built Applications That Students Actually Use</h2>
+        <p>District portals built for administrators rarely serve students well. Mainm designs and engineers student-facing applications from the ground up around the real workflows of secondary students — accessing schedules, checking grades, navigating campus resources, and communicating with teachers — on the devices and in the contexts where students actually are.</p>
+        <p>Every application is built as a progressive web app requiring no App Store approval, optimized for the low-end Chromebooks that most schools issue, and authenticated against your existing identity provider so students never manage a separate password.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Real-time schedule display with bell schedule integration and day-type detection (A/B, block, modified)</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Live grade visibility pulling directly from LMS grade books with what-if scenario modeling</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Assignment aggregation across all courses and platforms into a unified, prioritized task list</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>PWA architecture delivering native app experience with offline capability on any device</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Accessible design meeting WCAG 2.1 AA standards with full keyboard navigation and screen reader support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Implementation -->
+  <div class="sol-section" id="implementation" style="background:var(--cream-dark)">
+    <div class="sol-section-inner flip">
+      <div class="sol-img reveal">
+        <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80&auto=format&fit=crop" alt="Implementation team"/>
+      </div>
+      <div class="reveal">
+        <div class="sol-tag">Implementation & Support</div>
+        <h2>A Delivery Model Built Around District Success, Not Contract Milestones</h2>
+        <p>The EdTech industry has conditioned districts to expect implementation projects that run over schedule, deliver partial scope, and disappear at go-live. Mainm operates differently. Every engagement is staffed with a dedicated implementation engineer who owns the technical relationship from discovery through production stability — and who is measured by the same SLA your district holds us to.</p>
+        <p>We don't hand off documentation. We staff ongoing technical support with the same engineers who built the integration, because context continuity is the single largest predictor of resolution speed when issues arise.</p>
+        <div class="sol-bullets">
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Structured discovery engagement to document your current architecture before a single line of code is written</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Staged rollout methodology with feature flags enabling controlled exposure and instant rollback capability</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Named implementation engineer and dedicated Slack channel for direct technical communication</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>4-hour response SLA for P1 incidents with 24/7 on-call rotation during academic year operations</div>
+          <div class="sol-bullet"><div class="sol-bullet-dot"></div>Quarterly business reviews with integration health metrics, roadmap alignment, and capacity planning</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <div class="sol-pricing">
+    <div class="sol-pricing-inner">
+      <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto">
+        <div class="eyebrow">Engagement Models</div>
+        <h2 class="section-title light">Structured for Districts of Every Scale</h2>
+        <p class="section-sub light">All engagements are scoped following a complimentary discovery session. The tiers below represent typical starting configurations.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pricing-tier">Foundation</div>
+          <div class="pricing-price">Custom <span>/ year</span></div>
+          <p class="pricing-desc">Single-platform integration for districts up to 5,000 students. Ideal for schools beginning their integration journey.</p>
+          <div class="pricing-feats">
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>One LMS or SIS integration</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Standard grade + roster sync</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Email support, 24hr SLA</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Compliance documentation</div>
+          </div>
+          <button class="btn-ghost" onclick="showPage('contact')">Request Scoping</button>
+        </div>
+        <div class="pricing-card featured reveal">
+          <div class="pricing-tier">Professional</div>
+          <div class="pricing-price">Custom <span>/ year</span></div>
+          <p class="pricing-desc">Multi-platform integration suite for mid-size districts. The most common configuration for districts of 5,000–25,000 students.</p>
+          <div class="pricing-feats">
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>LMS + SIS integration bundle</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>District analytics dashboard</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Named implementation engineer</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>4-hour P1 response SLA</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Quarterly business reviews</div>
+          </div>
+          <button class="btn-gold" onclick="showPage('contact')">Request Scoping</button>
+        </div>
+        <div class="pricing-card reveal">
+          <div class="pricing-tier">Enterprise</div>
+          <div class="pricing-price">Custom <span>/ year</span></div>
+          <p class="pricing-desc">Full-platform deployment for large districts and multi-district consortia. White-glove delivery with dedicated engineering capacity.</p>
+          <div class="pricing-feats">
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited platform integrations</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom student applications</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Dedicated engineering squad</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>1-hour P1 SLA, 24/7 on-call</div>
+            <div class="pricing-feat"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>SOC 2 Type II reporting</div>
+          </div>
+          <button class="btn-ghost" onclick="showPage('contact')">Request Scoping</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /solutions -->
+
+
+<!-- ═══ ABOUT PAGE ═══════════════════════════════════════════════ -->
+<div id="page-about" class="page">
+
+  <div class="about-hero">
+    <div class="about-hero-inner">
+      <div>
+        <div class="eyebrow reveal">Our Story</div>
+        <h1 class="section-title light reveal">Built by People Who Ran District Technology</h1>
+        <p class="reveal">Mainm Education Solutions was founded because the people building EdTech rarely had to live with the consequences of their architectural decisions. We started inside districts. We know what breaks at 7:45 AM on the first day of school.</p>
+      </div>
+      <div class="about-hero-img reveal">
+        <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80&auto=format&fit=crop" alt="Education"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mission -->
+  <div class="section light-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Mission & Vision</div>
+        <h2 class="section-title">The Conviction That Drives Every Engagement</h2>
+        <p class="section-sub">Technology should serve the educational mission — not create a secondary administrative burden that consumes the institutional capacity needed to actually teach students.</p>
+      </div>
+      <div class="mission-grid">
+        <div class="mission-card reveal">
+          <h3>Our Mission</h3>
+          <p>To eliminate the data infrastructure failures that divert district attention, budget, and talent away from instructional improvement — by building integration systems so reliable they become invisible.</p>
+        </div>
+        <div class="mission-card reveal">
+          <h3>Our Vision</h3>
+          <p>A K–12 technology landscape where every teacher, administrator, student, and family has access to accurate, timely, and actionable information about learning — delivered through systems that just work.</p>
+        </div>
+        <div class="mission-card reveal">
+          <h3>Our Commitment</h3>
+          <p>To operate as a long-term institutional partner, not a transactional vendor — measuring our success by district outcomes years after implementation, not by contract close rates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="section dark-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Our History</div>
+        <h2 class="section-title light">From District IT to National Platform</h2>
+      </div>
+      <div class="history-timeline">
+        <div class="timeline-item reveal">
+          <div class="timeline-year">2018</div>
+          <div class="timeline-content">
+            <h4>Founded in the field</h4>
+            <p>Armin Farman, after a decade as a district technology director, founds Mainm to solve the integration problems he encountered firsthand. First engagement: a PowerSchool-to-Schoology grade sync for a single New York district.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-year">2019</div>
+          <div class="timeline-content">
+            <h4>Schoology developer certification</h4>
+            <p>Mainm obtains official Schoology developer credentials and publishes the first version of its multi-tenant integration platform. Expands to five district clients across three states.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-year">2021</div>
+          <div class="timeline-content">
+            <h4>Analytics platform launch</h4>
+            <p>Following district requests for consolidated visibility, Mainm launches its district analytics layer — aggregating SIS and LMS data into role-appropriate dashboards. Reaches 50 district clients.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-year">2023</div>
+          <div class="timeline-content">
+            <h4>Student applications division</h4>
+            <p>Expands into student-facing application development, launching the first Mainm-built PWA serving 80,000 secondary students across eight districts. Ed-Fi alliance membership obtained.</p>
+          </div>
+        </div>
+        <div class="timeline-item reveal">
+          <div class="timeline-year">2025</div>
+          <div class="timeline-content">
+            <h4>Enterprise scale</h4>
+            <p>Mainm now serves 500+ schools across 40+ districts, with over one million students on Mainm-integrated platforms. Pursuing Schoology enterprise partner designation and expanding compliance framework to cover all 50-state student privacy law landscape.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Values -->
+  <div class="section mid-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Operating Principles</div>
+        <h2 class="section-title light">The Standards We Hold Ourselves To</h2>
+        <p class="section-sub light">Not aspirational statements crafted for marketing materials — the actual criteria by which we evaluate every technical and commercial decision.</p>
+      </div>
+      <div class="values-grid">
+        <div class="value-card reveal"><div class="value-num">01</div><div><h4>Student-first architecture</h4><p>Every data flow, access control, and user interface decision is evaluated first by its impact on students. Operational efficiency is a secondary objective, never a primary one.</p></div></div>
+        <div class="value-card reveal"><div class="value-num">02</div><div><h4>Radical transparency</h4><p>Districts receive complete documentation of what data we access, how it flows, where it is stored, and who can see it. No opaque middleware, no undisclosed third-party sharing.</p></div></div>
+        <div class="value-card reveal"><div class="value-num">03</div><div><h4>Production standards without exception</h4><p>We do not deploy to production environments without automated testing, rollback procedures, monitoring coverage, and documented incident response. Not even for small districts.</p></div></div>
+        <div class="value-card reveal"><div class="value-num">04</div><div><h4>Context continuity in support</h4><p>The engineer who built your integration is the engineer who answers your support ticket. We do not route district issues through tiered helpdesk agents reading from scripts.</p></div></div>
+        <div class="value-card reveal"><div class="value-num">05</div><div><h4>Long-arc partnership</h4><p>We price our engagements to create room for ongoing investment in your integration's health. Single-year contracts that maximize year-one revenue at the expense of years two and three are not our model.</p></div></div>
+        <div class="value-card reveal"><div class="value-num">06</div><div><h4>Equity as a design constraint</h4><p>We build for the median device and the median network connection in your district — not the best. Applications that only work well on high-end hardware in high-bandwidth environments serve your most advantaged students disproportionately.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="section off-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Leadership</div>
+        <h2 class="section-title">The Team Behind Mainm</h2>
+        <p class="section-sub">Educators, engineers, and district operations veterans who have all, at some point, been on the receiving end of the problems we now solve.</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&auto=format&fit=crop" alt="Armin Farman"/></div>
+          <div class="team-info">
+            <div class="team-name">Armin Farman</div>
+            <div class="team-role">Founder & CEO</div>
+            <p class="team-bio">Twelve years as a district technology director across three New York districts before founding Mainm. Holds a B.S. in Computer Science and an M.Ed. in Educational Leadership. Armin built Mainm's first integration himself the weekend he realized no vendor could solve the problem he was living inside.</p>
+          </div>
+        </div>
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80&auto=format&fit=crop" alt="Director of Engineering"/></div>
+          <div class="team-info">
+            <div class="team-name">Sarah Chen</div>
+            <div class="team-role">VP of Engineering</div>
+            <p class="team-bio">Previously principal engineer at a major SIS vendor where she authored core API infrastructure serving 15 million students. Joined Mainm to apply enterprise engineering practices to a mission-driven context. Leads all platform architecture, security, and reliability engineering.</p>
+          </div>
+        </div>
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80&auto=format&fit=crop" alt="Head of Partnerships"/></div>
+          <div class="team-info">
+            <div class="team-name">James Okonkwo</div>
+            <div class="team-role">VP of District Partnerships</div>
+            <p class="team-bio">Former Deputy Superintendent of Technology for a 35,000-student district. Brings the client-side perspective to every district engagement — ensuring Mainm solutions are designed for how districts actually operate, not how vendors assume they do.</p>
+          </div>
+        </div>
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&auto=format&fit=crop" alt="Legal & Compliance"/></div>
+          <div class="team-info">
+            <div class="team-name">Maya Torres</div>
+            <div class="team-role">General Counsel & Chief Privacy Officer</div>
+            <p class="team-bio">Education privacy attorney with a decade of practice advising school districts and EdTech companies on FERPA, COPPA, and state student privacy law compliance. Architected Mainm's compliance framework from the ground up and maintains active relationships with state education agencies.</p>
+          </div>
+        </div>
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80&auto=format&fit=crop" alt="Head of Product"/></div>
+          <div class="team-info">
+            <div class="team-name">David Park</div>
+            <div class="team-role">Head of Product</div>
+            <p class="team-bio">Product leader who spent four years building student-facing tools inside a major LMS company before joining Mainm to work on the integration challenges those tools created. Leads product strategy for both platform integrations and student-facing applications.</p>
+          </div>
+        </div>
+        <div class="team-card reveal">
+          <div class="team-img-wrap"><img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&q=80&auto=format&fit=crop" alt="Head of Implementation"/></div>
+          <div class="team-info">
+            <div class="team-name">Rachel Nguyen</div>
+            <div class="team-role">Director of Implementation</div>
+            <p class="team-bio">Led district technology implementations for a national EdTech integrator before joining Mainm. Has personally overseen go-lives serving over 200,000 students. Built Mainm's staged rollout methodology and implementation playbook currently in use across all client engagements.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Partners -->
+  <div class="section light-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Technology Partners</div>
+        <h2 class="section-title">An Ecosystem Built on Certified Relationships</h2>
+        <p class="section-sub">Mainm maintains active partner relationships with the platforms your district uses — enabling faster implementation, direct escalation paths, and advance notice of API changes that could affect your integration.</p>
+      </div>
+      <div class="partners-logos">
+        <div class="partner-card reveal"><div class="partner-name">Schoology / PowerSchool</div><div class="partner-desc">Certified Integration Partner. Direct developer credential access and advance API roadmap briefings.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Instructure / Canvas</div><div class="partner-desc">Canvas LMS Partner Network member. LTI 1.3 certified with AGS grade passback.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Infinite Campus</div><div class="partner-desc">Campus Marketplace partner with native REST API integration and official data dictionary access.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Ed-Fi Alliance</div><div class="partner-desc">Alliance member contributing to ODS/API standards used in 22 state longitudinal data systems.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">IMS Global</div><div class="partner-desc">Contributing member. LTI Advantage, OneRoster, and QTI compliance across all integrations.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Google for Education</div><div class="partner-desc">Google Cloud partner with Workspace for Education integration and Classroom API access.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Microsoft Education</div><div class="partner-desc">Microsoft Certified Partner with Teams for Education and Azure AD federation capabilities.</div></div>
+        <div class="partner-card reveal"><div class="partner-name">Amazon Web Services</div><div class="partner-desc">EdTech Competency Partner with data residency in US-East regions for FERPA compliance.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /about -->
+
+
+<!-- ═══ CONTACT PAGE ════════════════════════════════════════════ -->
+<div id="page-contact" class="page">
+
+  <div class="contact-hero">
+    <div class="contact-hero-inner">
+      <div class="eyebrow reveal">Get in Touch</div>
+      <h1 class="section-title light reveal">Start the Conversation</h1>
+      <p class="reveal">Whether you're evaluating integration options for an upcoming RFP, troubleshooting a current platform problem, or simply want to understand what a Schoology partnership looks like in practice — we're ready. Every inquiry receives a response from a technical team member, not a sales development representative reading from a script.</p>
+    </div>
+  </div>
+
+  <div class="section dark-section">
+    <div class="section-inner">
+      <div class="contact-grid">
+        <div class="contact-info-block">
+          <div class="contact-card reveal">
+            <div class="contact-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <h4>Direct Email</h4>
+            <p>For partnership and integration inquiries:<br><a href="mailto:armin.farman@mainm.net">armin.farman@mainm.net</a><br><br>For technical support:<br><a href="mailto:support@mainm.net">support@mainm.net</a></p>
+          </div>
+          <div class="contact-card reveal">
+            <div class="contact-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+            <h4>Website</h4>
+            <p><a href="https://mainm.net">mainm.net</a><br><br>Documentation portal, API references, and implementation guides available to credentialed partners at docs.mainm.net.</p>
+          </div>
+          <div class="contact-card reveal">
+            <div class="contact-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+            <h4>Response Times</h4>
+            <p>Partnership and sales inquiries: 1 business day.<br><br>Technical support (existing clients): 4 hours for P2, 1 hour for P1 during business hours, 24/7 for active incidents.</p>
+          </div>
+          <div class="contact-card reveal">
+            <div class="contact-card-icon"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <h4>Headquarters</h4>
+            <p>Mainm Education Solutions<br>United States<br><br>Serving districts nationally with remote implementation capability across all time zones.</p>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="contact-form-wrap">
+            <div class="form-title">Send Us a Message</div>
+            <p class="form-sub">Fill out the form below and a member of our solutions team will respond within one business day. For urgent technical issues, email support@mainm.net directly.</p>
+            <form onsubmit="handleSubmit(event)">
+              <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" placeholder="Jane" required/></div>
+                <div class="form-group"><label>Last Name</label><input type="text" placeholder="Smith" required/></div>
+              </div>
+              <div class="form-group"><label>Work Email</label><input type="email" placeholder="jane.smith@district.edu" required/></div>
+              <div class="form-row">
+                <div class="form-group"><label>Organization</label><input type="text" placeholder="Scarsdale City School District" required/></div>
+                <div class="form-group"><label>Role / Title</label><input type="text" placeholder="Director of Technology"/></div>
+              </div>
+              <div class="form-group"><label>District Size</label>
+                <select>
+                  <option>Under 1,000 students</option>
+                  <option>1,000–5,000 students</option>
+                  <option>5,000–15,000 students</option>
+                  <option>15,000–50,000 students</option>
+                  <option>50,000+ students</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Current LMS / SIS Platforms</label><input type="text" placeholder="e.g. Schoology + PowerSchool"/></div>
+              <div class="form-group"><label>How can we help?</label>
+                <select>
+                  <option>LMS Integration (Schoology, Canvas, Blackboard)</option>
+                  <option>Student Information System Pipeline</option>
+                  <option>District Analytics & Reporting</option>
+                  <option>Student-Facing Application Development</option>
+                  <option>Data Privacy & Compliance Framework</option>
+                  <option>Implementation Services</option>
+                  <option>General Partnership Inquiry</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Message</label><textarea placeholder="Describe your district's current situation and what you're hoping to accomplish. The more context you provide, the more useful our initial response will be."></textarea></div>
+              <button type="submit" class="form-submit">Send Message</button>
+              <p class="form-note">We do not add contacts to marketing lists without explicit consent. Your information is used solely to respond to your inquiry.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offices -->
+  <div class="section light-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Coverage</div>
+        <h2 class="section-title">Where We Work</h2>
+        <p class="section-sub">Mainm operates as a distributed organization with implementation engineers embedded in the regions they serve. We do not require on-site presence for routine operations — but we show up when it matters.</p>
+      </div>
+      <div class="offices-grid">
+        <div class="office-card reveal">
+          <div class="office-city">New York</div>
+          <div class="office-type">Headquarters</div>
+          <p class="office-detail">Executive leadership, legal and compliance team, and primary engineering infrastructure. Home to our largest concentration of Northeast district client relationships.</p>
+        </div>
+        <div class="office-card reveal">
+          <div class="office-city">Chicago</div>
+          <div class="office-type">Midwest Regional Hub</div>
+          <p class="office-detail">Implementation engineering and district partnerships team serving Illinois, Indiana, Ohio, Michigan, and Wisconsin district clients.</p>
+        </div>
+        <div class="office-card reveal">
+          <div class="office-city">Austin</div>
+          <div class="office-type">South &amp; West Hub</div>
+          <p class="office-detail">Product and platform engineering team alongside district relations serving Texas, California, Arizona, and the broader Southwest regional market.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section off-section">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="eyebrow">Common Questions</div>
+        <h2 class="section-title">Before You Reach Out</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:3rem">
+        <div class="reveal" style="background:#fff;border:1px solid var(--cream-dark);border-radius:10px;padding:1.5rem">
+          <h4 style="font-family:'Playfair Display',serif;font-size:.95rem;color:var(--navy);margin-bottom:.5rem">How long does a typical implementation take?</h4>
+          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.72;font-weight:300">A single LMS or SIS integration typically reaches production in 4–8 weeks following a completed discovery engagement. Multi-platform implementations run 10–16 weeks. We have never missed a go-live date tied to a school year start.</p>
+        </div>
+        <div class="reveal" style="background:#fff;border:1px solid var(--cream-dark);border-radius:10px;padding:1.5rem">
+          <h4 style="font-family:'Playfair Display',serif;font-size:.95rem;color:var(--navy);margin-bottom:.5rem">Do you require multi-year contracts?</h4>
+          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.72;font-weight:300">We offer both annual and multi-year agreements. Multi-year contracts carry meaningful price advantages and are required for the Enterprise tier, but we do not require them for Foundation or Professional engagements.</p>
+        </div>
+        <div class="reveal" style="background:#fff;border:1px solid var(--cream-dark);border-radius:10px;padding:1.5rem">
+          <h4 style="font-family:'Playfair Display',serif;font-size:.95rem;color:var(--navy);margin-bottom:.5rem">Can you work with our existing IT staff?</h4>
+          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.72;font-weight:300">Yes — and we prefer it. District IT staff have institutional knowledge that accelerates implementation and makes the resulting integration more durable. We document everything to district standards so your team can maintain and extend the work independently.</p>
+        </div>
+        <div class="reveal" style="background:#fff;border:1px solid var(--cream-dark);border-radius:10px;padding:1.5rem">
+          <h4 style="font-family:'Playfair Display',serif;font-size:.95rem;color:var(--navy);margin-bottom:.5rem">Are you on state or cooperative purchasing contracts?</h4>
+          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.72;font-weight:300">We are in the process of obtaining NYSCA and NASPO contracts and can be engaged through existing district sole-source or RFP processes in the interim. Our legal team can support procurement documentation requirements.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /contact -->
+
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
 <footer>
-  <span>Gulf War footage · 1990–1991 · Hi8 / Betacam SP · Multi-generation dub</span>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="nav-logo" style="cursor:default;margin-bottom:.75rem">
+          <div class="nav-logo-mark">M</div>
+          <span class="nav-logo-text">Mainm <span>Education</span></span>
+        </div>
+        <p>Enterprise EdTech integration infrastructure for K–12 districts. Certified Schoology developer partner. Serving 500+ schools across the United States.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Solutions</h5>
+        <a onclick="showPage('solutions')">LMS Integration</a>
+        <a onclick="showPage('solutions')">SIS Pipelines</a>
+        <a onclick="showPage('solutions')">Analytics</a>
+        <a onclick="showPage('solutions')">Compliance</a>
+        <a onclick="showPage('solutions')">Student Apps</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a onclick="showPage('about')">About Us</a>
+        <a onclick="showPage('about')">Leadership</a>
+        <a onclick="showPage('about')">Partners</a>
+        <a onclick="showPage('contact')">Careers</a>
+        <a onclick="showPage('contact')">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <a href="mailto:armin.farman@mainm.net">armin.farman@mainm.net</a>
+        <a href="mailto:support@mainm.net">support@mainm.net</a>
+        <a href="https://mainm.net">mainm.net</a>
+        <a onclick="showPage('contact')">Get in Touch</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Mainm Education Solutions. All rights reserved.</div>
+      <div class="footer-legal">
+        <a>Privacy Policy</a>
+        <a>Terms of Service</a>
+        <a>Student Data Privacy</a>
+        <a>FERPA Compliance</a>
+      </div>
+    </div>
+  </div>
 </footer>
 
-<script src="effect.js"></script>
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(runReveal, 100);
+}
+
+function runReveal() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ Message Sent — We\'ll be in touch within one business day';
+    btn.style.background = '#22c55e';
+    setTimeout(() => { btn.textContent = 'Send Message'; btn.style.background = ''; btn.disabled = false; }, 5000);
+  }, 900);
+}
+
+runReveal();
+</script>
 </body>
 </html>
