@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown of School</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: black;
+            color: cyan;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .countdown-container {
+            display: inline-block;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 15px cyan;
+        }
+
+        .countdown {
+            font-size: 40px;
+            font-weight: bold;
+            text-shadow: 0 0 10px cyan;
+            min-width: 300px;
+        }
+
+        .milliseconds {
+            font-size: 20px;
+            opacity: 0.7;
+        }
+
+        input {
+            font-size: 18px;
+            padding: 5px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: none;
+            box-shadow: 0 0 10px cyan;
+            background-color: black;
+            color: cyan;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Time Until School Ends (2026)</h1>
+
+
+    <br>
+
+    <div class="countdown-container">
+        <h2>June 26</h2>
+        <div class="countdown" id="earlyCountdown"></div>
+        <div class="milliseconds" id="earlyMilliseconds"></div>
+    </div>
+    <br>
+    
+
+    <script>
+        let earlyTargetDate = new Date(`June 26, 2026 00:00:00`).getTime();
+        let regularTargetDate = new Date(`January 1, 2032 00:00:00`).getTime();
+
+        function updateTargetDates() {
+            const gradYear = parseInt(document.getElementById("gradYearInput").value) || 2031;
+            earlyTargetDate = new Date(`November 1, ${gradYear} 00:00:00`).getTime();
+            regularTargetDate = new Date(`January 1, ${gradYear + 1} 00:00:00`).getTime();
+        }
+
+        function updateCountdowns() {
+            const now = new Date().getTime();
+
+            function formatCountdown(target, countdownId, msId) {
+                const timeLeft = target - now;
+                if (timeLeft >= 0) {
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    const milliseconds = timeLeft % 1000;
+
+                    document.getElementById(countdownId).innerHTML =
+                        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                    document.getElementById(msId).innerHTML = `${milliseconds}ms`;
+                } else {
+                    document.getElementById(countdownId).innerHTML = "Time's up!";
+                    document.getElementById(msId).innerHTML = "";
+                }
+            }
+
+            formatCountdown(earlyTargetDate, "earlyCountdown", "earlyMilliseconds");
+            formatCountdown(regularTargetDate, "regularCountdown", "regularMilliseconds");
+        }
+
+        setInterval(updateCountdowns, 50);
+    </script>
+
+</body>
+</html>
