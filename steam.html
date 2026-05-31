@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steam Profit Calculator</title>
+
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e2a38, #2c3e50);
+        color: white;
+        margin: 0;
+        padding: 30px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 900px;
+        background: #1b2735;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+    }
+
+    th {
+        background: #243447;
+    }
+
+    td {
+        background: #2c3e50;
+    }
+
+    input {
+        padding: 6px;
+        border-radius: 6px;
+        border: none;
+        width: 95%;
+    }
+
+    button {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        margin: 4px;
+        transition: 0.2s;
+    }
+
+    .add { background: #27ae60; color: white; }
+    .export { background: #2980b9; color: white; }
+    .import { background: #8e44ad; color: white; }
+    .clear { background: #c0392b; color: white; }
+
+    button:hover {
+        opacity: 0.85;
+        transform: scale(1.03);
+    }
+
+    .total {
+        font-size: 1.2rem;
+        text-align: right;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .footer-note {
+        font-size: 0.85rem;
+        opacity: 0.6;
+        margin-top: 10px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Steam Profit Calculator</h1>
+
+    <table id="itemsTable">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Sell Price ($)</th>
+                <th>You Receive ($)</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button class="add" onclick="addRow()">+ Add Item</button>
+    <button class="export" onclick="exportCSV()">Export CSV</button>
+    <button class="import" onclick="document.getElementById('csvInput').click()">Import CSV</button>
+    <button class="clear" onclick="clearAll()">Clear All</button>
+    <input type="file" id="csvInput" accept=".csv" style="display:none" onchange="importCSV(event)">
+
+    <div class="total" id="totalProfit">Total You Receive: $0.00</div>
+
+    <div class="footer-note">
+        Formula used: Price / 1.15 - 0.01 (Steam Fee)
+    </div>
+</div>
+
+<script>
+let items = JSON.parse(localStorage.getItem("steamItems")) || [];
+
+function calculate(price) {
+    let result = (price / 1.15) - 0.01;
+    return Math.max(0, Math.round(result * 100) / 100);
+}
+
+function save() {
+    localStorage.setItem("steamItems", JSON.stringify(items));
+}
+
+function render() {
+    const tbody = document.querySelector("#itemsTable tbody");
+    tbody.innerHTML = "";
+    let total = 0;
+
+    items.forEach((item, index) => {
+        const receive = calculate(item.price);
+        total += receive;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td><input value="${item.name}" onchange="updateName(${index}, this.value)"></td>
+            <td><input type="number" step="0.01" value="${item.price}" onchange="updatePrice(${index}, this.value)"></td>
+            <td>$${receive.toFixed(2)}</td>
+            <td><button onclick="removeItem(${index})">❌</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById("totalProfit").innerText =
+        "Total You Receive: $" + total.toFixed(2);
+
+    save();
+}
+
+function addRow(name = "", price = 0) {
+    items.push({ name, price: parseFloat(price) || 0 });
+    render();
+}
+
+function updateName(index, value) {
+    items[index].name = value;
+    save();
+}
+
+function updatePrice(index, value) {
+    items[index].price = parseFloat(value) || 0;
+    render();
+}
+
+function removeItem(index) {
+    items.splice(index, 1);
+    render();
+}
+
+function clearAll() {
+    if (confirm("Clear all items?")) {
+        items = [];
+        render();
+    }
+}
+
+function exportCSV() {
+    let csv = "Item Name,Sell Price,You Receive\n";
+    items.forEach(item => {
+        const receive = calculate(item.price).toFixed(2);
+        csv += `${item.name},${item.price},${receive}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "steam_profit.csv";
+    link.click();
+}
+
+function importCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split("\n").slice(1);
+        items = [];
+        lines.forEach(line => {
+            const [name, price] = line.split(",");
+            if (name && price) {
+                items.push({ name: name.trim(), price: parseFloat(price) });
+            }
+        });
+        render();
+    };
+    reader.readAsText(file);
+}
+
+render();
+</script>
+
+</body>
+</html>
