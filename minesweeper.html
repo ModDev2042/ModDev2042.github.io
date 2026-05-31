@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Minesweeper</title>
+<style>
+  :root{
+    --bg:#c0c0c0;
+    --panel:#d4d0c8;
+    --bevel-light:#ffffff;
+    --bevel-dark:#808080;
+    --tile:#e0e0e0;
+    --tile-down:#bdbdbd;
+    --font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    --digit-bg:#000;
+    --digit-color:#ff0000;
+    --tile-size:28px;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(#b8b8b8,#d0d0d0);font-family:var(--font);}
+  .container{max-width:1200px;margin:18px auto;padding:14px;background:var(--panel);border:2px solid var(--bevel-dark);box-shadow:4px 4px 0 rgba(0,0,0,0.15);}
+  h1{margin:0 0 10px;font-size:20px;color:#222;}
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .counter, .timer{
+    width:90px;height:36px;background:var(--digit-bg);color:var(--digit-color);font-weight:700;
+    display:flex;align-items:center;justify-content:center;border-radius:4px;font-family:monospace;
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,0.05), inset -2px -2px 0 rgba(0,0,0,0.2);
+  }
+  .controls{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+  .btn{
+    height:32px;padding:0 10px;background:linear-gradient(var(--bevel-light),var(--tile));
+    border:2px solid var(--bevel-dark);display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    box-shadow:2px 2px 0 rgba(0,0,0,0.15);user-select:none;font-size:13px;
+  }
+  .btn:active{transform:translateY(1px);box-shadow:none;}
+  .smiley{
+    width:36px;height:36px;border-radius:4px;background:linear-gradient(var(--bevel-light),var(--tile));
+    border:2px solid var(--bevel-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .board-wrap{position:relative;display:flex;justify-content:center;padding:12px;background:linear-gradient(#e8e8e8,#d8d8d8);border:2px solid var(--bevel-dark);overflow:hidden;}
+  .viewport{
+    width:100%;height:100%;overflow:hidden;touch-action:none;
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .board{
+    display:grid;gap:4px;background:transparent;padding:6px;transform-origin:0 0;
+    will-change:transform;
+  }
+  .tile{
+    width:var(--tile-size);height:var(--tile-size);display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(var(--bevel-light),var(--tile));border:2px solid var(--bevel-dark);
+    box-sizing:border-box;cursor:pointer;user-select:none;font-weight:700;color:#000;font-size:14px;
+    -webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+  }
+  .tile.down{background:linear-gradient(var(--tile-down),#a8a8a8);box-shadow:inset 1px 1px 0 rgba(255,255,255,0.2);}
+  .tile.flag{color:#d00;}
+  .tile.mine{color:#000;}
+  .tile.revealed{background:#cfcfcf;border:1px solid #8a8a8a;cursor:default;}
+  .tile.revealed.number-1{color:#0000ff;}
+  .tile.revealed.number-2{color:#008200;}
+  .tile.revealed.number-3{color:#ff0000;}
+  .tile.revealed.number-4{color:#000084;}
+  .tile.revealed.number-5{color:#840000;}
+  .tile.revealed.number-6{color:#008284;}
+  .tile.revealed.number-7{color:#000;}
+  .tile.revealed.number-8{color:#808080;}
+  .footer{display:flex;justify-content:space-between;margin-top:12px;font-size:13px;color:#333;flex-wrap:wrap;gap:8px;}
+  .difficulty{display:flex;gap:6px;align-items:center;}
+  select{height:32px;padding:4px;border:1px solid #888;background:white;font-size:13px;}
+  .watermark{
+    position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;opacity:0;transition:opacity .25s ease;
+  }
+  .watermark.show{opacity:1;pointer-events:none;}
+  .watermark .mark{
+    transform:rotate(-20deg);
+    font-size:clamp(18px,6vw,64px);
+    color:rgba(200,20,20,0.18);
+    font-weight:900;letter-spacing:6px;text-transform:uppercase;
+    text-align:center;padding:10px 20px;
+  }
+  .zoom-controls{display:flex;gap:6px;align-items:center;margin-left:8px;}
+  .tile:focus{outline:3px solid rgba(0,120,215,0.25);}
+  .flag-mode.active{background:#ffd; border-color:#b88;}
+  .replay-panel{
+    margin-top:10px;padding:8px;border:1px solid #999;background:#eee;display:flex;flex-direction:column;gap:6px;font-size:13px;
+  }
+  .replay-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  textarea{width:100%;min-height:80px;font-family:monospace;font-size:12px;}
+  @media (max-width:720px){
+    :root{--tile-size:34px;}
+    .container{margin:8px;padding:10px;}
+  }
+  @media (max-width:420px){
+    :root{--tile-size:40px;}
+    .counter,.timer{width:100px;height:40px;font-size:16px;}
+    .btn{height:34px;}
+  }
+</style>
+</head>
+<body>
+<div class="container" role="application" aria-label="Minesweeper">
+  <h1>Minesweeper</h1>
+  <div class="toolbar">
+    <div class="counter" id="mineCounter">000</div>
+    <div class="smiley" id="resetBtn" title="Reset">
+      😊
+    </div>
+    <div class="timer" id="timer">000.000</div>
+    <div class="controls">
+      <div class="btn" id="newGameBtn">New</div>
+      <div class="btn" id="hintBtn">Hint</div>
+      <div class="btn flag-mode" id="flagModeBtn" title="Toggle flag mode for touch">Flag Mode</div>
+      <div class="difficulty">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="beginner">Beginner (9×9, 10)</option>
+          <option value="intermediate" selected>Intermediate (16×16, 40)</option>
+          <option value="expert">Expert (30×16, 99)</option>
+          <option value="massive">MASSIVE (100×100, 500)</option>
+        </select>
+      </div>
+      <div class="zoom-controls">
+        <div class="btn" id="zoomIn">Zoom +</div>
+        <div class="btn" id="zoomOut">Zoom −</div>
+        <div class="btn" id="resetView">Reset View</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="board-wrap" id="boardWrap">
+    <div class="viewport" id="viewport">
+      <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
+    </div>
+    <div class="watermark" id="watermark" aria-hidden="true">
+      <div class="mark" id="watermarkText">HINT USED — RUN DISQUALIFIED</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Tap to reveal • Long-press to flag • Double-tap to chord • Drag to pan • Wheel to zoom</div>
+    <div id="status">Ready</div>
+  </div>
+
+  <div class="replay-panel">
+    <strong>Replay</strong>
+    <div class="replay-row">
+      <span>Playback speed:</span>
+      <select id="replaySpeed">
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+      <div class="btn" id="playReplayBtn">Play Loaded Replay</div>
+      <div class="btn" id="stopReplayBtn">Stop Replay</div>
+    </div>
+    <div class="replay-row">
+      <div class="btn" id="copyReplayBtn">Copy Last Replay Code</div>
+    </div>
+    <textarea id="replayCode" placeholder="Replay code will appear here after a game, or paste one to load."></textarea>
+    <div class="replay-row">
+      <div class="btn" id="loadReplayBtn">Load Replay Code</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // Elements
+  const boardEl = document.getElementById('board');
+  const viewport = document.getElementById('viewport');
+  const boardWrap = document.getElementById('boardWrap');
+  const mineCounterEl = document.getElementById('mineCounter');
+  const timerEl = document.getElementById('timer');
+  const resetBtn = document.getElementById('resetBtn');
+  const newGameBtn = document.getElementById('newGameBtn');
+  const hintBtn = document.getElementById('hintBtn');
+  const flagModeBtn = document.getElementById('flagModeBtn');
+  const difficultySelect = document.getElementById('difficulty');
+  const statusEl = document.getElementById('status');
+  const watermark = document.getElementById('watermark');
+  const zoomInBtn = document.getElementById('zoomIn');
+  const zoomOutBtn = document.getElementById('zoomOut');
+  const resetViewBtn = document.getElementById('resetView');
+
+  const replayCodeEl = document.getElementById('replayCode');
+  const replaySpeedEl = document.getElementById('replaySpeed');
+  const playReplayBtn = document.getElementById('playReplayBtn');
+  const stopReplayBtn = document.getElementById('stopReplayBtn');
+  const copyReplayBtn = document.getElementById('copyReplayBtn');
+  const loadReplayBtn = document.getElementById('loadReplayBtn');
+
+  // Game state
+  let rows = 16, cols = 16, mines = 40;
+  let grid = [];
+  let started = false, timer = null, msStart = 0, msElapsed = 0;
+  let remainingMines = mines;
+  let revealedCount = 0, totalCells = 0;
+  let gameOver = false;
+  let disqualified = false;
+  let flagMode = false;
+  let longPressTimer = null;
+  const LONG_PRESS_MS = 500;
+
+  // View transform state
+  let scale = 1, minScale = 0.4, maxScale = 4;
+  let offsetX = 0, offsetY = 0;
+  let isPanning = false, panStart = null;
+  let lastTouchDist = null, lastTouchMid = null;
+
+  // Replay state
+  let isRecording = true;
+  let isReplaying = false;
+  let replayActions = [];
+  let replayLayout = null;
+  let replayMeta = null;
+  let replayTimerId = null;
+  let lastReplayCode = '';
+  let replayStartTime = 0;
+
+  function nowMs(){
+    return msElapsed;
+  }
+
+  function setDifficulty(val){
+    if(val==='beginner'){ rows=9; cols=9; mines=10; }
+    else if(val==='intermediate'){ rows=16; cols=16; mines=40; }
+    else if(val==='expert'){ rows=16; cols=30; mines=99; }
+    else { rows=100; cols=100; mines=500; }
+  }
+
+  function resetTimer(){
+    clearInterval(timer); timer = null; msElapsed = 0;
+    timerEl.textContent = formatTime(0);
+  }
+  function startTimer(){
+    if(timer) return;
+    msStart = performance.now() - msElapsed;
+    timer = setInterval(()=>{
+      msElapsed = performance.now() - msStart;
+      timerEl.textContent = formatTime(msElapsed);
+    }, 16);
+  }
+  function formatTime(ms){
+    const totalMs = Math.floor(ms);
+    const seconds = Math.floor(totalMs / 1000);
+    const millis = totalMs % 1000;
+    return `${String(seconds).padStart(3,'0')}.${String(millis).padStart(3,'0')}`;
+  }
+  function pad(n){ return String(Math.min(n,999)).padStart(3,'0'); }
+
+  function resetView(){
+    scale = 1; offsetX = 0; offsetY = 0; updateTransform();
+  }
+  function updateTransform(){
+    boardEl.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+  }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  function initBoard(){
+    stopReplay();
+    boardEl.innerHTML = '';
+    grid = [];
+    started = false; gameOver = false; revealedCount = 0; disqualified = false;
+    flagMode = false; flagModeBtn.classList.remove('active');
+    watermark.classList.remove('show');
+    setDifficulty(difficultySelect.value);
+    totalCells = rows * cols;
+    remainingMines = mines;
+    mineCounterEl.textContent = pad(remainingMines);
+    resetTimer();
+    statusEl.textContent = 'Ready';
+    resetView();
+    isRecording = true;
+    replayActions = [];
+    replayLayout = null;
+    replayMeta = { difficulty: difficultySelect.value };
+
+    const tileSize = getComputedStyle(document.documentElement).getPropertyValue('--tile-size') || '28px';
+    boardEl.style.gridTemplateColumns = `repeat(${cols}, ${tileSize})`;
+    boardEl.style.gridTemplateRows = `repeat(${rows}, ${tileSize})`;
+
+    for(let r=0;r<rows;r++){
+      const row = [];
+      for(let c=0;c<cols;c++){
+        const cell = { r,c, mine:false, revealed:false, flagged:false, adjacent:0, el:null };
+        const el = document.createElement('div');
+        el.className = 'tile';
+        el.tabIndex = 0;
+        el.dataset.r = r; el.dataset.c = c;
+        el.setAttribute('role','button');
+        el.setAttribute('aria-label',`Tile ${r+1},${c+1}`);
+        el.addEventListener('mousedown', onMouseDown);
+        el.addEventListener('mouseup', onMouseUp);
+        el.addEventListener('contextmenu', e=>e.preventDefault());
+        el.addEventListener('dblclick', onDoubleClick);
+        el.addEventListener('keydown', (ev)=>{
+          if(ev.key === ' ' || ev.key === 'Enter'){ ev.preventDefault(); el.click(); }
+          if(ev.key === 'F' || ev.key === 'f'){ toggleFlag(r,c); }
+        });
+        el.addEventListener('touchstart', onTouchStart, {passive:false});
+        el.addEventListener('touchend', onTouchEnd);
+        el.addEventListener('touchmove', onTouchMove, {passive:false});
+        boardEl.appendChild(el);
+        cell.el = el;
+        row.push(cell);
+      }
+      grid.push(row);
+    }
+    recordAction({type:'init', rows, cols, mines, t:0});
+  }
+
+  function placeMines(excludeR, excludeC){
+    let placed = 0;
+    while(placed < mines){
+      const r = Math.floor(Math.random()*rows);
+      const c = Math.floor(Math.random()*cols);
+      if(grid[r][c].mine) continue;
+      if(Math.abs(r-excludeR)<=1 && Math.abs(c-excludeC)<=1) continue;
+      grid[r][c].mine = true; placed++;
+    }
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(grid[r][c].mine) continue;
+        let count = 0;
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const nr=r+dr, nc=c+dc;
+          if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].mine) count++;
+        }
+        grid[r][c].adjacent = count;
+      }
+    }
+    // capture layout for replay
+    if(!replayLayout){
+      let bits = '';
+      for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+        bits += grid[r][c].mine ? '1' : '0';
+      }
+      replayLayout = bits;
+    }
+  }
+
+  function rebuildFromLayout(layout){
+    let i = 0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        grid[r][c].mine = layout[i++] === '1';
+      }
+    }
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(grid[r][c].mine){ grid[r][c].adjacent = 0; continue; }
+        let count = 0;
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const nr=r+dr, nc=c+dc;
+          if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].mine) count++;
+        }
+        grid[r][c].adjacent = count;
+      }
+    }
+  }
+
+  function revealCell(r,c){
+    const cell = grid[r][c];
+    if(cell.revealed || cell.flagged) return;
+    cell.revealed = true;
+    cell.el.classList.remove('down');
+    cell.el.classList.add('revealed');
+    if(cell.mine){
+      cell.el.textContent = '💣';
+      cell.el.classList.add('mine');
+      return;
+    }
+    revealedCount++;
+    if(cell.adjacent>0){
+      cell.el.textContent = cell.adjacent;
+      cell.el.classList.add('number-'+cell.adjacent);
+    } else {
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+        const nr=r+dr, nc=c+dc;
+        if(nr>=0 && nr<rows && nc>=0 && nc<cols && !grid[nr][nc].revealed){
+          revealCell(nr,nc);
+        }
+      }
+    }
+  }
+
+  function revealAllMines(triggerR, triggerC){
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+      const cell = grid[r][c];
+      if(cell.mine){
+        cell.el.classList.add('revealed','mine');
+        if(!(r===triggerR && c===triggerC)) cell.el.textContent = '💣';
+      }
+    }
+  }
+
+  function showWinSmileys(){
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+      const cell = grid[r][c];
+      if(cell.mine){
+        cell.el.classList.add('revealed');
+        cell.el.textContent = '😊';
+        cell.el.classList.remove('mine');
+      }
+    }
+  }
+
+  function checkWin(){
+    if(revealedCount === totalCells - mines){
+      gameOver = true;
+      clearInterval(timer); timer = null;
+      statusEl.textContent = disqualified ? 'Win (disqualified)' : 'You win!';
+      showWinSmileys();
+      finalizeReplay('win');
+    }
+  }
+
+  function toggleFlag(r,c){
+    const cell = grid[r][c];
+    if(cell.revealed) return;
+    cell.flagged = !cell.flagged;
+    if(cell.flagged){
+      cell.el.textContent = '🚩'; cell.el.classList.add('flag');
+      remainingMines--;
+    } else {
+      cell.el.textContent = ''; cell.el.classList.remove('flag');
+      remainingMines++;
+    }
+    mineCounterEl.textContent = pad(Math.max(0,remainingMines));
+    if(navigator.vibrate) try{ navigator.vibrate(20); }catch(e){}
+  }
+
+  // Recording
+  function recordAction(action){
+    if(!isRecording || isReplaying) return;
+    action.t = nowMs();
+    replayActions.push(action);
+  }
+
+  function finalizeReplay(result){
+    if(!replayLayout) return;
+    isRecording = false;
+    const data = {
+      meta: {
+        rows, cols, mines,
+        difficulty: difficultySelect.value,
+        result,
+        disqualified,
+        durationMs: msElapsed
+      },
+      layout: replayLayout,
+      actions: replayActions,
+      view: { } // view is encoded via zoom/pan actions
+    };
+    const json = JSON.stringify(data);
+    const code = btoa(unescape(encodeURIComponent(json)));
+    lastReplayCode = code;
+    replayCodeEl.value = code;
+  }
+
+  // Mouse handlers
+  function onMouseDown(e){
+    if(isReplaying) return;
+    if(gameOver) return;
+    const el = e.currentTarget;
+    const r = +el.dataset.r, c = +el.dataset.c;
+    if(e.button === 1 || (e.button === 0 && (e.ctrlKey || e.metaKey || e.shiftKey))){
+      startPan(e.clientX, e.clientY);
+      return;
+    }
+    if(e.button === 2){
+      toggleFlag(r,c);
+      recordAction({type:'flag', r, c});
+      return;
+    }
+    if(e.button === 0){
+      if(!grid[r][c].revealed) el.classList.add('down');
+    }
+  }
+
+  function onMouseUp(e){
+    if(isReplaying) return;
+    if(gameOver) return;
+    if(isPanning && (e.button === 1 || e.button === 0)){ endPan(); return; }
+    const el = e.currentTarget;
+    const r = +el.dataset.r, c = +el.dataset.c;
+    if(e.button === 0){
+      el.classList.remove('down');
+      const cell = grid[r][c];
+      if(cell.revealed) return;
+      if(cell.flagged){
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+        return;
+      }
+      if(flagMode){
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+        return;
+      }
+      if(!started){
+        placeMines(r,c);
+        started = true;
+        startTimer();
+        recordAction({type:'firstClick', r, c});
+      }
+      if(cell.mine){
+        cell.revealed = true;
+        cell.el.classList.add('revealed','mine');
+        cell.el.textContent = '💥';
+        revealAllMines(r,c);
+        gameOver = true; clearInterval(timer); timer = null;
+        statusEl.textContent = 'Game over';
+        mineCounterEl.textContent = pad(0);
+        recordAction({type:'revealMine', r, c});
+        finalizeReplay('lose');
+        return;
+      }
+      revealCell(r,c);
+      recordAction({type:'reveal', r, c});
+      checkWin();
+    }
+  }
+
+  function onDoubleClick(e){
+    if(isReplaying) return;
+    if(gameOver) return;
+    const el = e.currentTarget;
+    const r = +el.dataset.r, c = +el.dataset.c;
+    const cell = grid[r][c];
+    if(!cell.revealed) return;
+    let flagged = 0;
+    for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+      const nr=r+dr, nc=c+dc;
+      if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].flagged) flagged++;
+    }
+    if(flagged === cell.adjacent){
+      recordAction({type:'chord', r, c});
+      for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+        const nr=r+dr, nc=c+dc;
+        if(nr>=0 && nr<rows && nc>=0 && nc<cols && !grid[nr][nc].flagged && !grid[nr][nc].revealed){
+          if(grid[nr][nc].mine){
+            grid[nr][nc].el.textContent = '💥';
+            revealAllMines(nr,nc);
+            gameOver = true; clearInterval(timer); timer = null;
+            statusEl.textContent = 'Game over';
+            finalizeReplay('lose');
+            return;
+          } else {
+            revealCell(nr,nc);
+          }
+        }
+      }
+      checkWin();
+    }
+  }
+
+  // Touch handlers
+  function onTouchStart(e){
+    if(isReplaying) return;
+    if(gameOver) return;
+    e.preventDefault();
+    const touches = e.touches;
+    if(touches.length === 1){
+      const el = e.currentTarget;
+      const r = +el.dataset.r, c = +el.dataset.c;
+      longPressTimer = setTimeout(()=>{
+        longPressTimer = null;
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+      }, LONG_PRESS_MS);
+      if(!grid[r][c].revealed) el.classList.add('down');
+    } else if(touches.length === 2){
+      lastTouchDist = distance(touches[0], touches[1]);
+      lastTouchMid = midpoint(touches[0], touches[1]);
+    }
+  }
+  function onTouchMove(e){
+    if(isReplaying) return;
+    const touches = e.touches;
+    if(longPressTimer && touches.length !== 1){ clearTimeout(longPressTimer); longPressTimer = null; }
+    if(touches.length === 2){
+      e.preventDefault();
+      const d = distance(touches[0], touches[1]);
+      const mid = midpoint(touches[0], touches[1]);
+      if(lastTouchDist != null){
+        const factor = d / lastTouchDist;
+        zoomAt(mid.x, mid.y, factor, true);
+      }
+      if(lastTouchMid){
+        const dx = mid.x - lastTouchMid.x;
+        const dy = mid.y - lastTouchMid.y;
+        offsetX += dx;
+        offsetY += dy;
+        updateTransform();
+        recordAction({type:'pan', offsetX, offsetY});
+      }
+      lastTouchDist = d;
+      lastTouchMid = mid;
+    }
+  }
+  function onTouchEnd(e){
+    if(isReplaying) return;
+    const touches = e.touches;
+    if(longPressTimer){
+      clearTimeout(longPressTimer); longPressTimer = null;
+      const el = e.currentTarget;
+      const r = +el.dataset.r, c = +el.dataset.c;
+      const cell = grid[r][c];
+      el.classList.remove('down');
+      if(cell.flagged){
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+        return;
+      }
+      if(cell.revealed) return;
+      if(flagMode){
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+        return;
+      }
+      if(!started){
+        placeMines(r,c);
+        started = true;
+        startTimer();
+        recordAction({type:'firstClick', r, c});
+      }
+      if(cell.mine){
+        cell.revealed = true;
+        cell.el.classList.add('revealed','mine');
+        cell.el.textContent = '💥';
+        revealAllMines(r,c);
+        gameOver = true; clearInterval(timer); timer = null;
+        statusEl.textContent = 'Game over';
+        mineCounterEl.textContent = pad(0);
+        recordAction({type:'revealMine', r, c});
+        finalizeReplay('lose');
+        return;
+      }
+      revealCell(r,c);
+      recordAction({type:'reveal', r, c});
+      checkWin();
+    }
+    if(touches.length < 2){ lastTouchDist = null; lastTouchMid = null; }
+  }
+
+  function distance(a,b){ const dx=a.clientX-b.clientX, dy=a.clientY-b.clientY; return Math.hypot(dx,dy); }
+  function midpoint(a,b){ return { x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2 }; }
+
+  // Hint
+  function revealHint(){
+    if(isReplaying) return;
+    if(gameOver) return;
+    const candidates = [];
+    for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+      const cell = grid[r][c];
+      if(!cell.revealed && !cell.flagged && !cell.mine) candidates.push(cell);
+    }
+    if(candidates.length===0) return;
+    const pick = candidates[Math.floor(Math.random()*candidates.length)];
+    if(!started){
+      placeMines(pick.r,pick.c);
+      started = true;
+      startTimer();
+      recordAction({type:'firstClick', r:pick.r, c:pick.c, hintFirst:true});
+    }
+    revealCell(pick.r,pick.c);
+    disqualified = true;
+    watermark.classList.add('show');
+    statusEl.textContent = 'Disqualified — hint used';
+    recordAction({type:'hint', r:pick.r, c:pick.c});
+    checkWin();
+  }
+
+  // Zoom & pan
+  function zoomAt(clientX, clientY, factor, fromTouch=false){
+    const rect = boardEl.getBoundingClientRect();
+    const x = (clientX - rect.left - offsetX) / scale;
+    const y = (clientY - rect.top - offsetY) / scale;
+    scale = clamp(scale * factor, minScale, maxScale);
+    offsetX = clientX - rect.left - x * scale;
+    offsetY = clientY - rect.top - y * scale;
+    updateTransform();
+    recordAction({type:'zoom', scale, offsetX, offsetY});
+  }
+  function onWheel(e){
+    if(isReplaying) return;
+    if(e.ctrlKey) return;
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 1.12 : 0.9;
+    zoomAt(e.clientX, e.clientY, delta);
+  }
+  function startPan(clientX, clientY){
+    isPanning = true;
+    panStart = { x: clientX, y: clientY, ox: offsetX, oy: offsetY };
+    viewport.style.cursor = 'grabbing';
+  }
+  function onPointerMove(e){
+    if(!isPanning) return;
+    const dx = e.clientX - panStart.x;
+    const dy = e.clientY - panStart.y;
+    offsetX = panStart.ox + dx;
+    offsetY = panStart.oy + dy;
+    updateTransform();
+    recordAction({type:'pan', offsetX, offsetY});
+  }
+  function endPan(){
+    isPanning = false;
+    panStart = null;
+    viewport.style.cursor = 'default';
+  }
+
+  // Replay engine
+  function stopReplay(){
+    isReplaying = false;
+    clearTimeout(replayTimerId);
+    replayTimerId = null;
+    isRecording = true;
+    statusEl.textContent = 'Ready';
+  }
+
+  function playReplayFromCode(code){
+    try{
+      const json = decodeURIComponent(escape(atob(code.trim())));
+      const data = JSON.parse(json);
+      runReplay(data);
+    }catch(e){
+      alert('Invalid replay code.');
+    }
+  }
+
+  function runReplay(data){
+    stopReplay();
+    isReplaying = true;
+    isRecording = false;
+    replayActions = data.actions || [];
+    replayLayout = data.layout;
+    replayMeta = data.meta || {};
+    rows = replayMeta.rows;
+    cols = replayMeta.cols;
+    mines = replayMeta.mines;
+    difficultySelect.value = replayMeta.difficulty || 'intermediate';
+
+    // rebuild board
+    boardEl.innerHTML = '';
+    grid = [];
+    totalCells = rows * cols;
+    remainingMines = mines;
+    mineCounterEl.textContent = pad(remainingMines);
+    resetTimer();
+    resetView();
+    watermark.classList.toggle('show', !!replayMeta.disqualified);
+    disqualified = !!replayMeta.disqualified;
+    gameOver = false;
+    started = true;
+    revealedCount = 0;
+
+    const tileSize = getComputedStyle(document.documentElement).getPropertyValue('--tile-size') || '28px';
+    boardEl.style.gridTemplateColumns = `repeat(${cols}, ${tileSize})`;
+    boardEl.style.gridTemplateRows = `repeat(${rows}, ${tileSize})`;
+
+    for(let r=0;r<rows;r++){
+      const row = [];
+      for(let c=0;c<cols;c++){
+        const cell = { r,c, mine:false, revealed:false, flagged:false, adjacent:0, el:null };
+        const el = document.createElement('div');
+        el.className = 'tile';
+        el.dataset.r = r; el.dataset.c = c;
+        el.setAttribute('role','button');
+        el.setAttribute('aria-label',`Tile ${r+1},${c+1}`);
+        boardEl.appendChild(el);
+        cell.el = el;
+        row.push(cell);
+      }
+      grid.push(row);
+    }
+    rebuildFromLayout(replayLayout);
+
+    statusEl.textContent = 'Replaying...';
+    msElapsed = 0;
+    timerEl.textContent = formatTime(0);
+
+    const speed = parseFloat(replaySpeedEl.value) || 1;
+    let idx = 0;
+    replayStartTime = performance.now();
+
+    function step(){
+      if(!isReplaying) return;
+      if(idx >= replayActions.length){
+        statusEl.textContent = 'Replay finished';
+        isReplaying = false;
+        return;
+      }
+      const action = replayActions[idx];
+      const nextT = action.t;
+      const prevT = idx === 0 ? 0 : replayActions[idx-1].t;
+      const delay = (nextT - prevT) / speed;
+
+      replayTimerId = setTimeout(()=>{
+        applyReplayAction(action);
+        msElapsed = nextT;
+        timerEl.textContent = formatTime(msElapsed);
+        idx++;
+        step();
+      }, delay);
+    }
+    step();
+  }
+
+  function applyReplayAction(a){
+    switch(a.type){
+      case 'init':
+        break;
+      case 'firstClick':
+        // already have layout; just reveal
+        revealCell(a.r, a.c);
+        break;
+      case 'reveal':
+        revealCell(a.r, a.c);
+        break;
+      case 'revealMine':
+        grid[a.r][a.c].el.textContent = '💥';
+        revealAllMines(a.r, a.c);
+        gameOver = true;
+        statusEl.textContent = 'Game over (replay)';
+        break;
+      case 'flag':
+        toggleFlag(a.r, a.c);
+        break;
+      case 'chord':
+        // simulate chord: reveal neighbors if safe
+        const cell = grid[a.r][a.c];
+        if(!cell.revealed) break;
+        let flagged = 0;
+        for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+          const nr=a.r+dr, nc=a.c+dc;
+          if(nr>=0 && nr<rows && nc>=0 && nc<cols && grid[nr][nc].flagged) flagged++;
+        }
+        if(flagged === cell.adjacent){
+          for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+            const nr=a.r+dr, nc=a.c+dc;
+            if(nr>=0 && nr<rows && nc>=0 && nc<cols && !grid[nr][nc].flagged && !grid[nr][nc].revealed){
+              if(grid[nr][nc].mine){
+                grid[nr][nc].el.textContent = '💥';
+                revealAllMines(nr,nc);
+                gameOver = true;
+                statusEl.textContent = 'Game over (replay)';
+                return;
+              } else {
+                revealCell(nr,nc);
+              }
+            }
+          }
+        }
+        break;
+      case 'hint':
+        revealCell(a.r, a.c);
+        break;
+      case 'zoom':
+        scale = a.scale;
+        offsetX = a.offsetX;
+        offsetY = a.offsetY;
+        updateTransform();
+        break;
+      case 'pan':
+        offsetX = a.offsetX;
+        offsetY = a.offsetY;
+        updateTransform();
+        break;
+    }
+  }
+
+  // UI bindings
+  resetBtn.addEventListener('click', initBoard);
+  newGameBtn.addEventListener('click', initBoard);
+  hintBtn.addEventListener('click', revealHint);
+  difficultySelect.addEventListener('change', ()=>{ initBoard(); recordAction({type:'difficulty', value:difficultySelect.value}); });
+  flagModeBtn.addEventListener('click', ()=>{
+    flagMode = !flagMode;
+    flagModeBtn.classList.toggle('active', flagMode);
+    recordAction({type:'flagMode', on:flagMode});
+  });
+  zoomInBtn.addEventListener('click', ()=>{ zoomAt(window.innerWidth/2, window.innerHeight/2, 1.25); });
+  zoomOutBtn.addEventListener('click', ()=>{ zoomAt(window.innerWidth/2, window.innerHeight/2, 0.8); });
+  resetViewBtn.addEventListener('click', ()=>{ resetView(); recordAction({type:'viewReset', scale, offsetX, offsetY}); });
+
+  viewport.addEventListener('wheel', onWheel, {passive:false});
+  viewport.addEventListener('pointermove', onPointerMove);
+  viewport.addEventListener('pointerup', endPan);
+  viewport.addEventListener('pointercancel', endPan);
+  viewport.addEventListener('pointerleave', endPan);
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'F' || e.key === 'f'){
+      if(isReplaying) return;
+      const active = document.activeElement;
+      if(active && active.classList && active.classList.contains('tile')){
+        const r = +active.dataset.r, c = +active.dataset.c;
+        toggleFlag(r,c);
+        recordAction({type:'flag', r, c});
+      }
+    }
+  });
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Replay controls
+  copyReplayBtn.addEventListener('click', ()=>{
+    if(!lastReplayCode){
+      alert('No replay available yet. Finish a game first.');
+      return;
+    }
+    replayCodeEl.select();
+    document.execCommand('copy');
+  });
+
+  loadReplayBtn.addEventListener('click', ()=>{
+    const code = replayCodeEl.value.trim();
+    if(!code){ alert('Paste a replay code first.'); return; }
+    playReplayFromCode(code);
+  });
+
+  playReplayBtn.addEventListener('click', ()=>{
+    const code = replayCodeEl.value.trim() || lastReplayCode;
+    if(!code){ alert('No replay code to play.'); return; }
+    playReplayFromCode(code);
+  });
+
+  stopReplayBtn.addEventListener('click', stopReplay);
+
+  // initial setup
+  initBoard();
+
+  // expose for debugging
+  window.MS = { grid, initBoard };
+
+})();
+</script>
+</body>
+</html>
