@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Global Counter Race</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accentA:#ff6b6b;--accentB:#4fd1c5;--muted:#94a3b8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:linear-gradient(180deg,#071025 0%,#071729 100%);color:#e6eef6;display:flex;align-items:center;justify-content:center;height:100vh;padding:20px}
+    .wrap{width:960px;max-width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+
+    h1{margin:0 0 12px;font-size:20px}
+    p.sub{margin:0 0 18px;color:var(--muted)}
+
+    .board{display:flex;gap:18px;align-items:center}
+
+    .team{flex:1;background:var(--card);padding:20px;border-radius:12px;display:flex;flex-direction:column;align-items:center}
+    .team .label{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .team .count{font-size:44px;font-weight:700}
+    .btn{margin-top:14px;padding:16px 22px;border-radius:10px;border:0;font-weight:700;font-size:18px;cursor:pointer;width:100%;}
+    .btn:active{transform:translateY(1px)}
+
+    .btnA{background:linear-gradient(90deg,var(--accentA),#ff9c9c);color:#1b0a0a}
+    .btnB{background:linear-gradient(90deg,#8df0df,var(--accentB));color:#04221e}
+
+    .tug{height:24px;background:#071422;border-radius:999px;margin:18px 0;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .barA{height:100%;float:left;background:linear-gradient(90deg,var(--accentA),#ff9c9c);width:50%;transition:width:200ms ease}
+    .barB{height:100%;float:right;background:linear-gradient(90deg,#8df0df,var(--accentB));width:50%;transition:width:200ms ease}
+
+    .info{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px}
+    .small{color:var(--muted);font-size:13px}
+
+    .center{display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+    @media (max-width:700px){.board{flex-direction:column}.team{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Global Counter Race</h1>
+    <p class="sub">Two big buttons — Team A vs Team B. Click to add to your team's counter. All clients update in realtime.</p>
+
+    <div class="board">
+      <div class="team" id="teamABox">
+        <div class="label">Team A</div>
+        <div class="count" id="countA">—</div>
+        <button class="btn btnA" id="btnA">BOOST A</button>
+      </div>
+      
+      <div style="margin-top:24px">
+      <h2 style="font-size:16px;margin-bottom:8px">Currently Online:</h2>
+      <ul id="onlineList" style="list-style:none;padding:0;margin:0;font-size:14px;color:var(--muted)"></ul>
+    </div>
+
+
+      <div style="width:240px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="width:100%">
+          <div class="tug">
+            <div class="barA" id="barA"></div>
+            <div class="barB" id="barB"></div>
+          </div>
+          <div class="info">
+            <div class="small">A: <span id="pctA">50%</span></div>
+            <div class="small">B: <span id="pctB">50%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="team" id="teamBBox">
+        <div class="label">Team B</div>
+        <div class="count" id="countB">—</div>
+        <button class="btn btnB" id="btnB">BOOST B</button>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+      <div class="small">Realtime powered by Firebase Realtime Database.</div>
+      <div style="display:flex;gap:8px">
+      </div>
+    </div>
+
+    <!--
+      SETUP INSTRUCTIONS:
+      1) Create a Firebase project at https://console.firebase.google.com
+      2) Enable Realtime Database and set rules for testing to:
+           {
+             "rules": {
+               ".read": true,
+               ".write": true
+             }
+           }
+         (Don't leave this in production.)
+      3) Replace the firebaseConfig object below with your project's config (apiKey, authDomain, databaseURL, etc.).
+      4) Open this file in a browser. Multiple clients will see realtime updates.
+    -->
+
+  </div>
+
+  <!-- Firebase (compat) CDN - replace with latest version if needed -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    // TODO: replace with your Firebase config
+ const firebaseConfig = {
+  apiKey: "AIzaSyCGACmI46d_TVXQIFoaD23oJx4iW2pGiJM",
+  authDomain: "tugg-c9690.firebaseapp.com",
+  databaseURL: "https://tugg-c9690-default-rtdb.firebaseio.com",
+  projectId: "tugg-c9690",
+  storageBucket: "tugg-c9690.firebasestorage.app",
+  messagingSenderId: "430864296163",
+  appId: "1:430864296163:web:b1bedff807d28d09ff7dd6"
+};
+
+    // Initialize
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const rootRef = db.ref('globalCounterRace');
+
+    // Elements
+    const countAEl = document.getElementById('countA');
+    const countBEl = document.getElementById('countB');
+    const btnA = document.getElementById('btnA');
+    const btnB = document.getElementById('btnB');
+    const barA = document.getElementById('barA');
+    const barB = document.getElementById('barB');
+    const pctAEl = document.getElementById('pctA');
+    const pctBEl = document.getElementById('pctB');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // Local click cooldown to avoid accidental spam
+    const CLICK_COOLDOWN_MS = 250; // adjust as you like
+    let lastClick = 0;
+
+    function safeClick() {
+      const now = Date.now();
+      if (now - lastClick < CLICK_COOLDOWN_MS) return false;
+      lastClick = now;
+      return true;
+    }
+
+    // Atomically increment counters using a transaction
+    function incrTeam(teamKey) {
+      if (!safeClick()) return;
+      const keyRef = rootRef.child(teamKey);
+      keyRef.transaction(current => {
+        return (current || 0) + 1;
+      }, (err, committed, snapshot) => {
+        if (err) console.error('Transaction failed:', err);
+      });
+    }
+
+    btnA.addEventListener('click', () => incrTeam('teamA'));
+    btnB.addEventListener('click', () => incrTeam('teamB'));
+
+    // Realtime listener for both counters
+    rootRef.on('value', snapshot => {
+      const data = snapshot.val() || {};
+      const a = parseInt(data.teamA || 0, 10);
+      const b = parseInt(data.teamB || 0, 10);
+
+      countAEl.textContent = a.toLocaleString();
+      countBEl.textContent = b.toLocaleString();
+
+      const total = a + b;
+      const pctA = total === 0 ? 50 : Math.round((a / total) * 100);
+      const pctB = total === 0 ? 50 : 100 - pctA;
+
+      barA.style.width = pctA + '%';
+      barB.style.width = pctB + '%';
+      pctAEl.textContent = pctA + '%';
+      pctBEl.textContent = pctB + '%';
+    });
+
+   
+
+    // Create initial counters if missing
+    rootRef.once('value').then(snap => {
+      if (!snap.exists()) rootRef.set({ teamA: 0, teamB: 0 });
+    });
+    const userListRef = db.ref('globalCounterRace/onlineUsers');
+let username = localStorage.getItem('username');
+
+// Prompt for name if not stored
+if (!username) {
+  username = prompt("Enter your name to join:");
+  while (!username || username.trim().length === 0) {
+    username = prompt("Name is required. Please enter your name:");
+  }
+  username = username.trim();
+  localStorage.setItem('username', username);
+}
+
+// Register user as online
+const userRef = userListRef.child(username);
+userRef.set(true);
+userRef.onDisconnect().remove(); // Remove on disconnect
+
+// Realtime listener for online users
+userListRef.on('value', snapshot => {
+  const users = snapshot.val() || {};
+  const listEl = document.getElementById('onlineList');
+  listEl.innerHTML = '';
+  Object.keys(users).forEach(name => {
+    const li = document.createElement('li');
+    li.textContent = name;
+    listEl.appendChild(li);
+  });
+});
+
+  </script>
+</body>
+</html>
