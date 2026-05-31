@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Click Counter</title>
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // TODO: Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAREOuvS4SNQcZPWFlSdB--lZJXbZiVaFw",
+      authDomain: "click-5b4fc.firebaseapp.com",
+      databaseURL: "https://click-5b4fc-default-rtdb.firebaseio.com",
+      projectId: "click-5b4fc",
+      storageBucket: "click-5b4fc.firebasestorage.app",
+      messagingSenderId: "880792906003",
+      appId: "1:880792906003:web:f2cb786b91f7ac42aa12e6"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const counterRef = ref(db, "counter/value");
+
+    // Get HTML elements
+    const counterDisplay = document.getElementById("counter");
+    const button = document.getElementById("button");
+
+    // Listen for live updates
+    onValue(counterRef, (snapshot) => {
+      if (snapshot.exists()) {
+        counterDisplay.textContent = snapshot.val();
+      } else {
+        set(counterRef, 0);
+      }
+    });
+
+    // Increment counter on click
+    button.addEventListener("click", async () => {
+      const snapshot = await get(counterRef);
+      let current = snapshot.exists() ? snapshot.val() : 0;
+      update(ref(db, "counter"), { value: current + 1 });
+    });
+  </script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: white;
+      color: #2575fc;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.3s ease;
+    }
+    button:hover {
+      transform: scale(1.1);
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="counter">0</h1>
+    <button id="button">+1</button>
+  </div>
+</body>
+</html>
