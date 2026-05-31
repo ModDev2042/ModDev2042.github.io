@@ -1,106 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown of School</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Projects</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background-color: black;
-            color: cyan;
-            text-align: center;
-            margin-top: 50px;
-        }
+    :root {
+      --bg:      #f5f5f3;
+      --surface: #ffffff;
+      --border:  rgba(0,0,0,0.07);
+      --border-hover: rgba(0,0,0,0.14);
+      --text:    #111110;
+      --muted:   #999994;
+      --shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      --tog-bg:  #e6e6e4;
+      --tog-on:  #111110;
+      --tog-on-text: #fff;
+      --tog-off-text: #77776f;
+    }
+    [data-theme="dark"] {
+      --bg:      #111110;
+      --surface: #1a1a18;
+      --border:  rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.14);
+      --text:    #ededeb;
+      --muted:   #666660;
+      --shadow:  0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+      --shadow-hover: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
+      --tog-bg:  #2a2a28;
+      --tog-on:  #ededeb;
+      --tog-on-text: #111110;
+      --tog-off-text: #666660;
+    }
 
-        .countdown-container {
-            display: inline-block;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            box-shadow: 0 0 15px cyan;
-        }
+    html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; transition: background .3s, color .2s; }
 
-        .countdown {
-            font-size: 40px;
-            font-weight: bold;
-            text-shadow: 0 0 10px cyan;
-            min-width: 300px;
-        }
+    .page { max-width: 1080px; margin: 0 auto; padding: 3rem 2rem 5rem; }
 
-        .milliseconds {
-            font-size: 20px;
-            opacity: 0.7;
-        }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+    h1 { font-size: 1.4rem; font-weight: 500; letter-spacing: -0.02em; }
 
-        input {
-            font-size: 18px;
-            padding: 5px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: none;
-            box-shadow: 0 0 10px cyan;
-            background-color: black;
-            color: cyan;
-            text-align: center;
-        }
-    </style>
+    /* toggle */
+    .tog { display: flex; background: var(--tog-bg); border-radius: 9999px; padding: 3px; gap: 2px; }
+    .tog button { background: none; border: none; cursor: pointer; padding: 5px 15px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; font-family: inherit; color: var(--tog-off-text); transition: background .15s, color .15s; letter-spacing: 0.03em; }
+    .tog button.on { background: var(--tog-on); color: var(--tog-on-text); }
+
+    /* grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+    /* card */
+    .card { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s, border-color .2s; }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-hover); }
+
+    /* thumbnail — pure CSS, no iframe */
+    .thumb {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+    }
+    .thumb-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center top;
+      filter: blur(1.5px) brightness(0.9);
+      transform: scale(1.04); /* hide blur edge artifacts */
+    }
+
+    /* vignette */
+    .thumb::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.3) 100%);
+      z-index: 1;
+    }
+
+    .thumb-name {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: -0.01em;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,1);
+      padding: 1rem;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-
-    <h1>Time Until School Ends (2026)</h1>
-
-
-    <br>
-
-    <div class="countdown-container">
-        <h2>June 26</h2>
-        <div class="countdown" id="earlyCountdown"></div>
-        <div class="milliseconds" id="earlyMilliseconds"></div>
+<div class="page">
+  <header>
+    <h1>Projects</h1>
+    <div class="tog">
+      <button class="on" id="btn-light" onclick="setTheme('light')">Light</button>
+      <button id="btn-dark" onclick="setTheme('dark')">Dark</button>
     </div>
-    <br>
-    
+  </header>
+  <div class="grid" id="grid"></div>
+</div>
 
-    <script>
-        let earlyTargetDate = new Date(`June 26, 2026 00:00:00`).getTime();
-        let regularTargetDate = new Date(`January 1, 2032 00:00:00`).getTime();
+<script>
+  /* ── ADD / REMOVE PROJECTS HERE ── */
+  /* img = filename inside the ./images/ folder (just the filename, no path) */
+  const projects = [
+    { name: 'Clock',                   href: './',             img: 'index.png'       },
+    { name: 'Grades',                  href: './grades/',      img: 'grades.png'      },
+    { name: 'Countdown',               href: './countdown/',   img: 'countdown.png'   },
+    { name: 'Scioly Entomology ID',    href: './entomology',   img: 'entomology.png'  },
+    { name: 'Global Clicker',          href: './click',        img: 'click.png'       },
+    { name: 'Global Tug of War',       href: './tug',          img: 'tug.png'         },
+    { name: 'Countdown to College',    href: './college',      img: 'college.png'     },
+    { name: 'Minesweeper',             href: './minesweeper',  img: 'minesweeper.png' },
+    { name: 'Steam Profit Calculator', href: './steam',        img: 'steam.png'       },
+  ];
 
-        function updateTargetDates() {
-            const gradYear = parseInt(document.getElementById("gradYearInput").value) || 2031;
-            earlyTargetDate = new Date(`November 1, ${gradYear} 00:00:00`).getTime();
-            regularTargetDate = new Date(`January 1, ${gradYear + 1} 00:00:00`).getTime();
-        }
+  function buildGrid() {
+    const grid = document.getElementById('grid');
+    projects.forEach(p => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = p.href;
 
-        function updateCountdowns() {
-            const now = new Date().getTime();
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
 
-            function formatCountdown(target, countdownId, msId) {
-                const timeLeft = target - now;
-                if (timeLeft >= 0) {
-                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                    const milliseconds = timeLeft % 1000;
+      const bg = document.createElement('div');
+      bg.className = 'thumb-bg';
+      bg.style.backgroundImage = `url('./images/${p.img}')`;
 
-                    document.getElementById(countdownId).innerHTML =
-                        `${days}d ${hours}h ${minutes}m ${seconds}s`;
-                    document.getElementById(msId).innerHTML = `${milliseconds}ms`;
-                } else {
-                    document.getElementById(countdownId).innerHTML = "Time's up!";
-                    document.getElementById(msId).innerHTML = "";
-                }
-            }
+      thumb.appendChild(bg);
 
-            formatCountdown(earlyTargetDate, "earlyCountdown", "earlyMilliseconds");
-            formatCountdown(regularTargetDate, "regularCountdown", "regularMilliseconds");
-        }
+      const name = document.createElement('div');
+      name.className = 'thumb-name';
+      name.textContent = p.name;
+      thumb.appendChild(name);
 
-        setInterval(updateCountdowns, 50);
-    </script>
+      a.appendChild(thumb);
+      grid.appendChild(a);
+    });
+  }
 
+  function setTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('btn-light').classList.toggle('on', t === 'light');
+    document.getElementById('btn-dark').classList.toggle('on', t === 'dark');
+    localStorage.setItem('guide-theme', t);
+  }
+
+  if (localStorage.getItem('guide-theme') === 'dark') setTheme('dark');
+  buildGrid();
+</script>
 </body>
 </html>
