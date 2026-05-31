@@ -1,164 +1,1134 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Projects</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; color: #1a1a1a; font-family: 'Inter', sans-serif; min-height: 100vh; }
 
-    :root {
-      --bg:      #f5f5f3;
-      --surface: #ffffff;
-      --border:  rgba(0,0,0,0.07);
-      --border-hover: rgba(0,0,0,0.14);
-      --text:    #111110;
-      --muted:   #999994;
-      --shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
-      --tog-bg:  #e6e6e4;
-      --tog-on:  #111110;
-      --tog-on-text: #fff;
-      --tog-off-text: #77776f;
-    }
-    [data-theme="dark"] {
-      --bg:      #111110;
-      --surface: #1a1a18;
-      --border:  rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.14);
-      --text:    #ededeb;
-      --muted:   #666660;
-      --shadow:  0 1px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
-      --shadow-hover: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4);
-      --tog-bg:  #2a2a28;
-      --tog-on:  #ededeb;
-      --tog-on-text: #111110;
-      --tog-off-text: #666660;
-    }
+  header { padding: 24px 20px 16px; border-bottom: 1px solid #e8e8e8; text-align: center; }
+  h1 { font-size: 17px; font-weight: 600; color: #111; margin-bottom: 12px; }
+  .score-bar { display: flex; justify-content: center; gap: 28px; font-size: 12px; color: #888; }
+  .score-bar span { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .score-num { font-size: 20px; font-weight: 600; color: #111; }
 
-    html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; transition: background .3s, color .2s; }
+  .main { max-width: 520px; margin: 0 auto; padding: 24px 20px; }
 
-    .page { max-width: 1080px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  /* Mode toggle */
+  .mode-row { display: flex; gap: 6px; margin-bottom: 16px; justify-content: center; }
+  .mode-btn { background: #f5f5f5; border: 1px solid #e0e0e0; color: #555; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.15s; }
+  .mode-btn.active { background: #111; border-color: #111; color: #fff; }
 
-    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
-    h1 { font-size: 1.4rem; font-weight: 500; letter-spacing: -0.02em; }
+  /* Filter chips */
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; scrollbar-width: none; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; background: #f5f5f5; border: 1px solid #e0e0e0; color: #555; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .chip:hover { background: #ebebeb; }
+  .chip.active { background: #111; border-color: #111; color: #fff; }
 
-    /* toggle */
-    .tog { display: flex; background: var(--tog-bg); border-radius: 9999px; padding: 3px; gap: 2px; }
-    .tog button { background: none; border: none; cursor: pointer; padding: 5px 15px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; font-family: inherit; color: var(--tog-off-text); transition: background .15s, color .15s; letter-spacing: 0.03em; }
-    .tog button.on { background: var(--tog-on); color: var(--tog-on-text); }
+  /* Photo */
+  .photo-wrap { width: 100%; aspect-ratio: 4/3; background: #f5f5f5; border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 16px; }
+  .photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.35s; }
+  .photo-wrap img.hidden { opacity: 0; }
+  .photo-wrap img.visible { opacity: 1; }
+  .photo-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #aaa; }
+  .photo-nav-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.15s; }
+  .dot.active { background: #fff; }
+  .photo-arrows { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; }
+  .arrow-btn { pointer-events: all; background: rgba(255,255,255,0.85); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; box-shadow: 0 1px 4px rgba(0,0,0,0.12); transition: opacity 0.15s; }
+  .arrow-btn.hidden { opacity: 0; pointer-events: none; }
 
-    /* grid */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+  /* Hint */
+  .hint-box { background: #f0f6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #2563eb; margin-bottom: 16px; display: none; }
+  .hint-box.show { display: block; }
+  .hint-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; color: #93b4f0; }
 
-    /* card */
-    .card { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s, border-color .2s; }
-    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-hover); }
+  /* Input */
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .answer-input { flex: 1; padding: 11px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; color: #111; background: #fff; }
+  .answer-input:focus { border-color: #111; }
+  .answer-input.correct { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+  .answer-input.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+  .answer-input:disabled { opacity: 0.8; }
+  .submit-btn { padding: 11px 18px; background: #111; color: #fff; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .submit-btn:hover { background: #333; }
+  .submit-btn:disabled { background: #ccc; cursor: default; }
 
-    /* thumbnail — pure CSS, no iframe */
-    .thumb {
-      position: relative;
-      height: 180px;
-      overflow: hidden;
-    }
-    .thumb-bg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center top;
-      filter: blur(1.5px) brightness(0.9);
-      transform: scale(1.04); /* hide blur edge artifacts */
-    }
+  /* Autocomplete */
+  .autocomplete-list { position: relative; z-index: 10; margin-top: -6px; margin-bottom: 10px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+  .autocomplete-list.show { display: block; }
+  .autocomplete-item { padding: 9px 14px; font-size: 13px; cursor: pointer; transition: background 0.1s; color: #333; }
+  .autocomplete-item:hover, .autocomplete-item.highlighted { background: #f5f5f5; }
 
-    /* vignette */
-    .thumb::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.3) 100%);
-      z-index: 1;
-    }
+  /* Feedback */
+  .feedback { font-size: 13px; font-weight: 500; min-height: 18px; margin-bottom: 14px; }
+  .feedback.correct { color: #16a34a; }
+  .feedback.wrong { color: #dc2626; }
 
-    .thumb-name {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: #fff;
-      letter-spacing: -0.01em;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.55), 0 0 1px rgba(0,0,0,1);
-      padding: 1rem;
-      text-align: center;
-    }
-  </style>
+  /* Bottom row */
+  .bottom-row { display: flex; gap: 8px; align-items: center; }
+  .hint-btn { background: #fff; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #555; padding: 9px 14px; cursor: pointer; transition: all 0.15s; }
+  .hint-btn:hover { border-color: #aaa; color: #111; }
+  .hint-btn:disabled { opacity: 0.4; cursor: default; }
+  .skip-btn { background: #fff; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #555; padding: 9px 14px; cursor: pointer; transition: all 0.15s; }
+  .skip-btn:hover { border-color: #aaa; color: #111; }
+  .next-btn { background: #111; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #fff; padding: 9px 16px; cursor: pointer; display: none; margin-left: auto; transition: background 0.15s; }
+  .next-btn:hover { background: #333; }
+  .next-btn.show { display: block; }
+  .streak-pill { background: #111; color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: none; }
+  .streak-pill.show { display: inline-block; }
+
+  /* Mode label */
+  .mode-label { font-size: 11px; color: #aaa; text-align: center; margin-bottom: 14px; }
+</style>
 </head>
 <body>
-<div class="page">
-  <header>
-    <h1>Projects</h1>
-    <div class="tog">
-      <button class="on" id="btn-light" onclick="setTheme('light')">Light</button>
-      <button id="btn-dark" onclick="setTheme('dark')">Dark</button>
+
+<header>
+  <h1>Entomology ID Quiz — Science Olympiad 2026</h1>
+  <div class="score-bar">
+    <span><span class="score-num" id="sCorrect">0</span>correct</span>
+    <span><span class="score-num" id="sStreak">0</span>streak</span>
+    <span><span class="score-num" id="sTotal">0</span>total</span>
+  </div>
+</header>
+
+<div class="main">
+  <!-- Mode toggle: Order vs Family -->
+  <div class="mode-row">
+    <button class="mode-btn active" id="modeOrder" onclick="setMode('order')">Identify Order</button>
+    <button class="mode-btn" id="modeFamily" onclick="setMode('family')">Identify Family</button>
+  </div>
+  <div class="mode-label" id="modeLabel">Type the Order name (e.g. "Coleoptera")</div>
+
+  <!-- Filter chips -->
+  <div class="filter-row" id="filterRow"></div>
+
+  <!-- Photo -->
+  <div class="photo-wrap" id="photoWrap">
+    <div class="photo-loading" id="photoLoading">Image loading...</div>
+    <img id="bugImg" class="hidden" src="" alt="" onload="onImgLoad()" onerror="onImgError()">
+    <div class="photo-arrows">
+      <button class="arrow-btn hidden" id="arrowLeft" onclick="changePhoto(-1)">‹</button>
+      <button class="arrow-btn hidden" id="arrowRight" onclick="changePhoto(1)">›</button>
     </div>
-  </header>
-  <div class="grid" id="grid"></div>
+    <div class="photo-nav-dots" id="navDots"></div>
+  </div>
+
+  <!-- Hint -->
+  <div class="hint-box" id="hintBox">
+    <div class="hint-label">Hint</div>
+    <div id="hintText"></div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-row">
+    <input class="answer-input" id="answerInput" type="text" placeholder="Type your answer…" autocomplete="off" oninput="onInput()" onkeydown="onKeyDown(event)">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">Check</button>
+  </div>
+  <div class="autocomplete-list" id="acList"></div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="bottom-row">
+    <button class="hint-btn" id="hintBtn" onclick="showHint()">Hint</button>
+    <button class="skip-btn" onclick="skip()">Skip</button>
+    <span class="streak-pill" id="streakPill"></span>
+    <button class="next-btn" id="nextBtn" onclick="nextBug()">Next →</button>
+  </div>
 </div>
 
 <script>
-  /* ── ADD / REMOVE PROJECTS HERE ── */
-  /* img = filename inside the ./images/ folder (just the filename, no path) */
-  const projects = [
-    { name: 'Clock',                   href: './',             img: 'index.png'       },
-    { name: 'Grades',                  href: './grades/',      img: 'grades.png'      },
-    { name: 'Countdown',               href: './countdown/',   img: 'countdown.png'   },
-    { name: 'Scioly Entomology ID',    href: './entomology',   img: 'entomology.png'  },
-    { name: 'Global Clicker',          href: './click',        img: 'click.png'       },
-    { name: 'Global Tug of War',       href: './tug',          img: 'tug.png'         },
-    { name: 'Countdown to College',    href: './college',      img: 'college.png'     },
-    { name: 'Minesweeper',             href: './minesweeper',  img: 'minesweeper.png' },
-    { name: 'Steam Profit Calculator', href: './steam',        img: 'steam.png'       },
-  ];
+// Full 2026 Science Olympiad Entomology list
+// Each entry: { family, commonName, order, orderCommon, search }
+// Orders without families are listed as order-level entries
+const BUGS = [
+  // Class Entognatha
+  { family: null, commonName: "telsontails / proturans", order: "Protura", orderCommon: "Protura", search: "Protura insect" },
+  { family: null, commonName: "springtails / snow fleas", order: "Collembola", orderCommon: "Collembola", search: "Collembola springtail insect" },
+  { family: null, commonName: "diplurans", order: "Diplura", orderCommon: "Diplura", search: "Diplura insect" },
+  // Class Insecta
+  { family: null, commonName: "bristletails", order: "Archaeognatha", orderCommon: "Archaeognatha", search: "Archaeognatha bristletail insect" },
+  { family: null, commonName: "silverfish / firebrats", order: "Zygentoma", orderCommon: "Zygentoma", search: "silverfish Zygentoma insect" },
+  { family: null, commonName: "mayflies", order: "Ephemeroptera", orderCommon: "Ephemeroptera", search: "mayfly Ephemeroptera insect" },
+  // Odonata families
+  { family: "Aeshnidae", commonName: "darners", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Aeshnidae darner dragonfly" },
+  { family: "Gomphidae", commonName: "clubtails", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Gomphidae clubtail dragonfly" },
+  { family: "Libellulidae", commonName: "skimmers", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Libellulidae skimmer dragonfly" },
+  { family: "Lestidae", commonName: "spread-wing damselflies", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Lestidae spread wing damselfly" },
+  { family: "Coenagrionidae", commonName: "narrow-winged damselflies", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Coenagrionidae damselfly blue" },
+  // Blattodea
+  { family: "Blattidae", commonName: "cockroaches", order: "Blattodea", orderCommon: "cockroaches & termites", search: "Blattidae cockroach" },
+  { family: "Termitidae", commonName: "termites", order: "Blattodea", orderCommon: "cockroaches & termites", search: "Termitidae termite" },
+  // Mantodea
+  { family: null, commonName: "mantids / praying mantis", order: "Mantodea", orderCommon: "Mantodea", search: "praying mantis Mantodea" },
+  // Notoptera
+  { family: null, commonName: "ice crawlers / rock crawlers", order: "Notoptera", orderCommon: "Notoptera", search: "Grylloblatta ice crawler insect" },
+  // Dermaptera
+  { family: null, commonName: "earwigs", order: "Dermaptera", orderCommon: "Dermaptera", search: "earwig Dermaptera insect" },
+  // Plecoptera
+  { family: null, commonName: "stoneflies", order: "Plecoptera", orderCommon: "Plecoptera", search: "stonefly Plecoptera insect" },
+  // Orthoptera families
+  { family: "Tetrigidae", commonName: "pygmy grasshoppers", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Tetrigidae pygmy grasshopper" },
+  { family: "Acrididae", commonName: "short-horned grasshoppers / locusts", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Acrididae grasshopper locust" },
+  { family: "Tettigoniidae", commonName: "katydids", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Tettigoniidae katydid green" },
+  { family: "Gryllacrididae", commonName: "camel crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllacrididae camel cricket" },
+  { family: "Gryllidae", commonName: "crickets / tree crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllidae cricket insect" },
+  { family: "Gryllotalpidae", commonName: "mole crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllotalpidae mole cricket" },
+  // Phasmatodea
+  { family: null, commonName: "walking sticks", order: "Phasmatodea", orderCommon: "Phasmatodea", search: "walkingstick Phasmatodea insect" },
+  // Psocoptera / Psocodea
+  { family: null, commonName: "booklice / barklice", order: "Psocoptera", orderCommon: "Psocoptera", search: "booklice barklice Psocoptera" },
+  // Embiptera
+  { family: null, commonName: "webspinners", order: "Embioptera", orderCommon: "Embioptera", search: "webspinner Embioptera insect" },
+  // Hemiptera families
+  { family: "Corixidae", commonName: "water boatmen", order: "Hemiptera", orderCommon: "true bugs", search: "Corixidae water boatmen bug" },
+  { family: "Notonectidae", commonName: "backswimmers", order: "Hemiptera", orderCommon: "true bugs", search: "Notonectidae backswimmer bug" },
+  { family: "Belostomatidae", commonName: "giant water bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Belostomatidae giant water bug" },
+  { family: "Nepidae", commonName: "waterscorpions", order: "Hemiptera", orderCommon: "true bugs", search: "Nepidae waterscorpion bug" },
+  { family: "Gelastocoridae", commonName: "toad bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Gelastocoridae toad bug" },
+  { family: "Gerridae", commonName: "water striders", order: "Hemiptera", orderCommon: "true bugs", search: "Gerridae water strider" },
+  { family: "Cimicidae", commonName: "bed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Cimicidae bed bug insect" },
+  { family: "Miridae", commonName: "plant bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Miridae plant bug insect" },
+  { family: "Reduviidae", commonName: "assassin bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Reduviidae assassin bug" },
+  { family: "Phymatidae", commonName: "ambush bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Phymatidae ambush bug" },
+  { family: "Tingidae", commonName: "lace bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Tingidae lace bug" },
+  { family: "Lygaeidae", commonName: "seed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Lygaeidae seed bug" },
+  { family: "Coreidae", commonName: "leaf-footed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Coreidae leaf footed bug" },
+  { family: "Pentatomidae", commonName: "stink bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Pentatomidae stink bug" },
+  { family: "Cicadidae", commonName: "cicadas", order: "Hemiptera", orderCommon: "true bugs", search: "Cicadidae cicada insect" },
+  { family: "Membracidae", commonName: "treehoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Membracidae treehopper insect" },
+  { family: "Cercopidae", commonName: "froghoppers / spittlebugs", order: "Hemiptera", orderCommon: "true bugs", search: "Cercopidae froghopper spittlebug" },
+  { family: "Cicadellidae", commonName: "leafhoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Cicadellidae leafhopper insect" },
+  { family: "Fulgoridae", commonName: "fulgorid planthoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Fulgoridae planthopper insect" },
+  { family: "Aphididae", commonName: "aphids", order: "Hemiptera", orderCommon: "true bugs", search: "Aphididae aphid insect" },
+  { family: "Dactylopiidae", commonName: "scale insects / cochineal", order: "Hemiptera", orderCommon: "true bugs", search: "Dactylopiidae scale insect cochineal" },
+  // Thysanoptera
+  { family: null, commonName: "thrips", order: "Thysanoptera", orderCommon: "Thysanoptera", search: "thrips Thysanoptera insect" },
+  // Megaloptera
+  { family: "Corydalidae", commonName: "dobsonflies / hellgrammites", order: "Megaloptera", orderCommon: "dobsonflies", search: "Corydalidae dobsonfly hellgrammite" },
+  { family: "Sialidae", commonName: "alderflies", order: "Megaloptera", orderCommon: "dobsonflies", search: "Sialidae alderfly insect" },
+  // Neuroptera
+  { family: "Chrysopidae", commonName: "green lacewings", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Chrysopidae green lacewing" },
+  { family: "Myrmeleontidae", commonName: "antlions", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Myrmeleontidae antlion insect" },
+  { family: "Mantispidae", commonName: "mantisflies", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Mantispidae mantisfly insect" },
+  // Coleoptera families
+  { family: "Carabidae", commonName: "ground beetles", order: "Coleoptera", orderCommon: "beetles", search: "Carabidae ground beetle" },
+  { family: "Dytiscidae", commonName: "predaceous diving beetles", order: "Coleoptera", orderCommon: "beetles", search: "Dytiscidae diving beetle" },
+  { family: "Gyrinidae", commonName: "whirligig beetles", order: "Coleoptera", orderCommon: "beetles", search: "Gyrinidae whirligig beetle" },
+  { family: "Hydrophilidae", commonName: "water scavenger beetles", order: "Coleoptera", orderCommon: "beetles", search: "Hydrophilidae water scavenger beetle" },
+  { family: "Silphidae", commonName: "carrion beetles", order: "Coleoptera", orderCommon: "beetles", search: "Silphidae carrion beetle" },
+  { family: "Staphylinidae", commonName: "rove beetles", order: "Coleoptera", orderCommon: "beetles", search: "Staphylinidae rove beetle" },
+  { family: "Lucanidae", commonName: "stag beetles", order: "Coleoptera", orderCommon: "beetles", search: "Lucanidae stag beetle" },
+  { family: "Scarabaeidae", commonName: "scarab beetles / dung beetles", order: "Coleoptera", orderCommon: "beetles", search: "Scarabaeidae scarab beetle" },
+  { family: "Buprestidae", commonName: "metallic wood-boring beetles / jewel beetles", order: "Coleoptera", orderCommon: "beetles", search: "Buprestidae jewel beetle metallic" },
+  { family: "Elateridae", commonName: "click beetles", order: "Coleoptera", orderCommon: "beetles", search: "Elateridae click beetle" },
+  { family: "Cantharidae", commonName: "soldier beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cantharidae soldier beetle" },
+  { family: "Lampyridae", commonName: "fireflies / lightning bugs", order: "Coleoptera", orderCommon: "beetles", search: "Lampyridae firefly lightning bug" },
+  { family: "Dermestidae", commonName: "dermestid / carpet beetles", order: "Coleoptera", orderCommon: "beetles", search: "Dermestidae carpet beetle" },
+  { family: "Coccinellidae", commonName: "lady beetles / ladybugs", order: "Coleoptera", orderCommon: "beetles", search: "Coccinellidae ladybug lady beetle" },
+  { family: "Meloidae", commonName: "blister beetles", order: "Coleoptera", orderCommon: "beetles", search: "Meloidae blister beetle" },
+  { family: "Cerambycidae", commonName: "longhorn beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cerambycidae longhorn beetle" },
+  { family: "Chrysomelidae", commonName: "leaf beetles", order: "Coleoptera", orderCommon: "beetles", search: "Chrysomelidae leaf beetle colorful" },
+  { family: "Curculionidae", commonName: "weevils / snout beetles", order: "Coleoptera", orderCommon: "beetles", search: "Curculionidae weevil snout beetle" },
+  { family: "Tenebrionidae", commonName: "darkling beetles", order: "Coleoptera", orderCommon: "beetles", search: "Tenebrionidae darkling beetle" },
+  { family: "Cleridae", commonName: "checkered beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cleridae checkered beetle colorful" },
+  // Mecoptera
+  { family: null, commonName: "scorpionflies", order: "Mecoptera", orderCommon: "Mecoptera", search: "scorpionfly Mecoptera insect" },
+  // Raphidioptera
+  { family: null, commonName: "snakeflies", order: "Raphidioptera", orderCommon: "Raphidioptera", search: "snakefly Raphidioptera insect" },
+  // Siphonaptera
+  { family: null, commonName: "fleas", order: "Siphonaptera", orderCommon: "Siphonaptera", search: "flea Siphonaptera insect microscope" },
+  // Diptera families
+  { family: "Tipulidae", commonName: "crane flies", order: "Diptera", orderCommon: "true flies", search: "Tipulidae crane fly" },
+  { family: "Culicidae", commonName: "mosquitoes", order: "Diptera", orderCommon: "true flies", search: "Culicidae mosquito insect" },
+  { family: "Chironomidae", commonName: "midges (non-biting)", order: "Diptera", orderCommon: "true flies", search: "Chironomidae midge insect" },
+  { family: "Simuliidae", commonName: "black flies / buffalo gnats", order: "Diptera", orderCommon: "true flies", search: "Simuliidae black fly buffalo gnat" },
+  { family: "Tabanidae", commonName: "horse flies / deer flies", order: "Diptera", orderCommon: "true flies", search: "Tabanidae horse fly deer fly" },
+  { family: "Asilidae", commonName: "robber flies", order: "Diptera", orderCommon: "true flies", search: "Asilidae robber fly" },
+  { family: "Syrphidae", commonName: "hover flies / flower flies", order: "Diptera", orderCommon: "true flies", search: "Syrphidae hoverfly flower fly" },
+  { family: "Tephritidae", commonName: "fruit flies (large)", order: "Diptera", orderCommon: "true flies", search: "Tephritidae fruit fly" },
+  { family: "Muscidae", commonName: "house flies", order: "Diptera", orderCommon: "true flies", search: "Muscidae house fly" },
+  { family: "Calliphoridae", commonName: "blow flies / bottle flies", order: "Diptera", orderCommon: "true flies", search: "Calliphoridae blow fly bottle fly" },
+  { family: "Tachinidae", commonName: "tachinid flies", order: "Diptera", orderCommon: "true flies", search: "Tachinidae tachinid fly bristly" },
+  { family: "Sarcophagidae", commonName: "flesh flies", order: "Diptera", orderCommon: "true flies", search: "Sarcophagidae flesh fly" },
+  // Trichoptera
+  { family: null, commonName: "caddisflies", order: "Trichoptera", orderCommon: "Trichoptera", search: "caddisfly Trichoptera adult" },
+  // Lepidoptera families
+  { family: "Papilionidae", commonName: "swallowtail butterflies", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Papilionidae swallowtail butterfly" },
+  { family: "Pieridae", commonName: "whites & sulphurs", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Pieridae white sulphur butterfly" },
+  { family: "Lycaenidae", commonName: "blues & coppers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Lycaenidae blue copper butterfly" },
+  { family: "Nymphalidae", commonName: "brush-footed butterflies", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Nymphalidae brush footed butterfly" },
+  { family: "Hesperiidae", commonName: "skippers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Hesperiidae skipper butterfly" },
+  { family: "Sphingidae", commonName: "hawk moths / sphinx moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Sphingidae hawk moth sphinx" },
+  { family: "Saturniidae", commonName: "giant silk moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Saturniidae giant silk moth" },
+  { family: "Noctuidae", commonName: "owlet moths / noctuid moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Noctuidae owlet moth noctuid" },
+  { family: "Geometridae", commonName: "inchworm moths / geometrid moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Geometridae geometer moth" },
+  { family: "Tortricidae", commonName: "tortrix moths / leafrollers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Tortricidae tortrix moth leafroller" },
+  // Hymenoptera families
+  { family: "Tenthredinidae", commonName: "sawflies", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Tenthredinidae sawfly insect" },
+  { family: "Ichneumonidae", commonName: "ichneumon wasps / parasitoid wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Ichneumonidae ichneumon wasp" },
+  { family: "Cynipidae", commonName: "gall wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Cynipidae gall wasp insect" },
+  { family: "Vespidae", commonName: "yellowjackets / hornets / paper wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Vespidae yellowjacket hornet paper wasp" },
+  { family: "Pompilidae", commonName: "spider wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Pompilidae spider wasp" },
+  { family: "Sphecidae", commonName: "digger wasps / mud daubers", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Sphecidae digger wasp mud dauber" },
+  { family: "Apidae", commonName: "bees (honey, bumble, carpenter)", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Apidae honey bee bumble bee" },
+  { family: "Halictidae", commonName: "sweat bees", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Halictidae sweat bee metallic green" },
+  { family: "Megachilidae", commonName: "leafcutter / mason bees", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Megachilidae leafcutter mason bee" },
+  { family: "Formicidae", commonName: "ants", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Formicidae ant insect" },
+  // Non-insect: Acari
+  { family: "Ixodidae", commonName: "hard ticks", order: "Acari", orderCommon: "ticks (non-insect)", search: "Ixodidae hard tick arachnid" },
+];
 
-  function buildGrid() {
-    const grid = document.getElementById('grid');
-    projects.forEach(p => {
-      const a = document.createElement('a');
-      a.className = 'card';
-      a.href = p.href;
+const ORDERS = [...new Set(BUGS.map(b => b.order))];
+const ORDER_FILTER_GROUPS = ['All','Odonata','Orthoptera','Hemiptera','Coleoptera','Diptera','Lepidoptera','Hymenoptera','Other'];
 
-      const thumb = document.createElement('div');
-      thumb.className = 'thumb';
+let mode = 'order'; // 'order' or 'family'
+let selectedGroup = 'All';
+let current = null;
+let photos = [];
+let photoIdx = 0;
+let answered = false;
+let correct = 0;
+let streak = 0;
+let total = 0;
+let used = [];
+let acHighlight = -1;
 
-      const bg = document.createElement('div');
-      bg.className = 'thumb-bg';
-      bg.style.backgroundImage = `url('./images/${p.img}')`;
+// Build filters
+const filterRow = document.getElementById('filterRow');
+ORDER_FILTER_GROUPS.forEach(g => {
+  const c = document.createElement('button');
+  c.className = 'chip' + (g === 'All' ? ' active' : '');
+  c.textContent = g;
+  c.onclick = () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    selectedGroup = g;
+    used = [];
+    nextBug();
+  };
+  filterRow.appendChild(c);
+});
 
-      thumb.appendChild(bg);
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeOrder').className = 'mode-btn' + (m === 'order' ? ' active' : '');
+  document.getElementById('modeFamily').className = 'mode-btn' + (m === 'family' ? ' active' : '');
+  document.getElementById('modeLabel').textContent = m === 'order'
+    ? 'Type the Order name (e.g. "Coleoptera")'
+    : 'Type the Family name (e.g. "Coccinellidae") or common name';
+  used = [];
+  nextBug();
+}
 
-      const name = document.createElement('div');
-      name.className = 'thumb-name';
-      name.textContent = p.name;
-      thumb.appendChild(name);
-
-      a.appendChild(thumb);
-      grid.appendChild(a);
-    });
+function getPool() {
+  let pool = BUGS;
+  if (mode === 'family') pool = BUGS.filter(b => b.family !== null);
+  if (selectedGroup === 'All') return pool;
+  if (selectedGroup === 'Other') {
+    const main = ['Odonata','Orthoptera','Hemiptera','Coleoptera','Diptera','Lepidoptera','Hymenoptera'];
+    return pool.filter(b => !main.includes(b.order));
   }
+  return pool.filter(b => b.order === selectedGroup);
+}
 
-  function setTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    document.getElementById('btn-light').classList.toggle('on', t === 'light');
-    document.getElementById('btn-dark').classList.toggle('on', t === 'dark');
-    localStorage.setItem('guide-theme', t);
+function getAnswerKey() {
+  if (mode === 'order') return current.order;
+  return current.family;
+}
+
+function getHintText() {
+  if (mode === 'order') return `Common name: ${current.commonName}`;
+  return `Order: ${current.order} (${current.orderCommon}) — Common name: ${current.commonName}`;
+}
+
+function normalize(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+function getACSuggestions(val) {
+  if (mode === 'order') {
+    return ORDERS.filter(o => o.toLowerCase().startsWith(val.toLowerCase())).slice(0, 6);
+  } else {
+    const families = [...new Set(BUGS.filter(b => b.family).map(b => b.family))];
+    const byFamily = families.filter(f => f.toLowerCase().startsWith(val.toLowerCase()));
+    const byCommon = BUGS.filter(b => b.family && b.commonName.toLowerCase().includes(val.toLowerCase())).map(b => b.family);
+    return [...new Set([...byFamily, ...byCommon])].slice(0, 6);
   }
+}
 
-  if (localStorage.getItem('guide-theme') === 'dark') setTheme('dark');
-  buildGrid();
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+async function nextBug() {
+  answered = false;
+  document.getElementById('hintBox').classList.remove('show');
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('hintBtn').disabled = false;
+  const inp = document.getElementById('answerInput');
+  inp.value = '';
+  inp.className = 'answer-input';
+  inp.disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+  hideAC();
+
+  const pool = getPool();
+  if (!pool.length) return;
+  let avail = pool.filter(b => {
+    const key = mode === 'order' ? b.order : b.family;
+    return !used.includes(key);
+  });
+  if (avail.length === 0) { used = []; avail = pool; }
+  current = avail[Math.floor(Math.random() * avail.length)];
+  used.push(mode === 'order' ? current.order : current.family);
+
+  // Reset photo
+  photos = [];
+  photoIdx = 0;
+  const img = document.getElementById('bugImg');
+  img.className = 'hidden';
+  img.src = '';
+  document.getElementById('photoLoading').textContent = 'Image loading...';
+  document.getElementById('photoLoading').style.display = 'flex';
+  document.getElementById('navDots').innerHTML = '';
+  document.getElementById('arrowLeft').classList.add('hidden');
+  document.getElementById('arrowRight').classList.add('hidden');
+
+  const fetched = await getWikimediaPhotos(current.search, 4);
+  photos = fetched;
+  if (photos.length > 0) { showPhoto(0); buildDots(); }
+
+  inp.focus();
+}
+
+function showPhoto(idx) {
+  const img = document.getElementById('bugImg');
+  img.className = 'hidden';
+  img.src = photos[idx];
+  photoIdx = idx;
+  updateArrows();
+  updateDots();
+}
+
+function buildDots() {
+  const dots = document.getElementById('navDots');
+  dots.innerHTML = '';
+  if (photos.length <= 1) return;
+  photos.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => showPhoto(i);
+    dots.appendChild(d);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === photoIdx ? ' active' : '');
+  });
+}
+
+function updateArrows() {
+  document.getElementById('arrowLeft').className = 'arrow-btn' + (photoIdx > 0 ? '' : ' hidden');
+  document.getElementById('arrowRight').className = 'arrow-btn' + (photoIdx < photos.length - 1 ? '' : ' hidden');
+}
+
+function changePhoto(dir) {
+  const ni = photoIdx + dir;
+  if (ni >= 0 && ni < photos.length) showPhoto(ni);
+}
+
+function onImgLoad() {
+  document.getElementById('bugImg').className = 'visible';
+  document.getElementById('photoLoading').style.display = 'none';
+}
+
+function onImgError() {
+  photoIdx++;
+  if (photoIdx < photos.length) showPhoto(photoIdx);
+  else { document.getElementById('photoLoading').textContent = 'Image loading...'; }
+}
+
+function onInput() {
+  const val = document.getElementById('answerInput').value.trim();
+  if (!val) { hideAC(); return; }
+  const matches = getACSuggestions(val);
+  if (!matches.length) { hideAC(); return; }
+  const list = document.getElementById('acList');
+  list.innerHTML = '';
+  acHighlight = -1;
+  matches.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    item.textContent = m;
+    item.onmousedown = () => { document.getElementById('answerInput').value = m; hideAC(); submitAnswer(); };
+    list.appendChild(item);
+  });
+  list.classList.add('show');
+}
+
+function hideAC() {
+  document.getElementById('acList').classList.remove('show');
+  acHighlight = -1;
+}
+
+function onKeyDown(e) {
+  const list = document.getElementById('acList');
+  const items = list.querySelectorAll('.autocomplete-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); acHighlight = Math.min(acHighlight+1, items.length-1); items.forEach((x,i)=>x.className='autocomplete-item'+(i===acHighlight?' highlighted':'')); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acHighlight = Math.max(acHighlight-1, -1); items.forEach((x,i)=>x.className='autocomplete-item'+(i===acHighlight?' highlighted':'')); }
+  else if (e.key === 'Enter') {
+    if (acHighlight >= 0 && items[acHighlight]) { document.getElementById('answerInput').value = items[acHighlight].textContent; hideAC(); }
+    submitAnswer();
+  } else if (e.key === 'Escape') hideAC();
+}
+
+function submitAnswer() {
+  if (answered) return;
+  const inp = document.getElementById('answerInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  hideAC();
+  answered = true;
+  total++;
+  document.getElementById('sTotal').textContent = total;
+  inp.disabled = true;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('hintBtn').disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+
+  const answer = getAnswerKey();
+  const isCorrect = normalize(val) === normalize(answer) ||
+    (mode === 'family' && normalize(val) === normalize(current.commonName));
+
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    inp.className = 'answer-input correct';
+    correct++; streak++;
+    document.getElementById('sCorrect').textContent = correct;
+    document.getElementById('sStreak').textContent = streak;
+    fb.textContent = '✓ Correct!';
+    fb.className = 'feedback correct';
+    if (streak >= 3) { document.getElementById('streakPill').textContent = `🔥 ${streak} streak`; document.getElementById('streakPill').classList.add('show'); }
+  } else {
+    inp.className = 'answer-input wrong';
+    streak = 0;
+    document.getElementById('sStreak').textContent = 0;
+    document.getElementById('streakPill').classList.remove('show');
+    const displayAnswer = mode === 'family' ? `${answer} (${current.commonName})` : `${answer} (${current.orderCommon})`;
+    fb.textContent = `✗ Answer: ${displayAnswer}`;
+    fb.className = 'feedback wrong';
+  }
+}
+
+function showHint() {
+  document.getElementById('hintBox').classList.add('show');
+  document.getElementById('hintText').textContent = getHintText();
+  document.getElementById('hintBtn').disabled = true;
+}
+
+function skip() { nextBug(); }
+
+async function getWikimediaPhotos(search, count) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(search)}&srnamespace=6&srlimit=${count+5}&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const titles = (data.query?.search||[]).map(r=>r.title).filter(t=>/\.(jpg|jpeg|png)/i.test(t));
+    const urls = [];
+    for (const title of titles.slice(0, count+2)) {
+      const u = await getImgUrl(title);
+      if (u) urls.push(u);
+      if (urls.length >= count) break;
+    }
+    return urls;
+  } catch { return []; }
+}
+
+async function getImgUrl(title) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=700&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = Object.values(data.query?.pages||{});
+    const info = pages[0]?.imageinfo?.[0];
+    return info?.thumburl || info?.url || null;
+  } catch { return null; }
+}
+
+nextBug();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; color: #1a1a1a; font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+  header { padding: 24px 20px 16px; border-bottom: 1px solid #e8e8e8; text-align: center; }
+  h1 { font-size: 17px; font-weight: 600; color: #111; margin-bottom: 12px; }
+  .score-bar { display: flex; justify-content: center; gap: 28px; font-size: 12px; color: #888; }
+  .score-bar span { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .score-num { font-size: 20px; font-weight: 600; color: #111; }
+
+  .main { max-width: 520px; margin: 0 auto; padding: 24px 20px; }
+
+  /* Mode toggle */
+  .mode-row { display: flex; gap: 6px; margin-bottom: 16px; justify-content: center; }
+  .mode-btn { background: #f5f5f5; border: 1px solid #e0e0e0; color: #555; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.15s; }
+  .mode-btn.active { background: #111; border-color: #111; color: #fff; }
+
+  /* Filter chips */
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; scrollbar-width: none; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; background: #f5f5f5; border: 1px solid #e0e0e0; color: #555; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .chip:hover { background: #ebebeb; }
+  .chip.active { background: #111; border-color: #111; color: #fff; }
+
+  /* Photo */
+  .photo-wrap { width: 100%; aspect-ratio: 4/3; background: #f5f5f5; border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 16px; }
+  .photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.35s; }
+  .photo-wrap img.hidden { opacity: 0; }
+  .photo-wrap img.visible { opacity: 1; }
+  .photo-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #aaa; }
+  .photo-nav-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.15s; }
+  .dot.active { background: #fff; }
+  .photo-arrows { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; }
+  .arrow-btn { pointer-events: all; background: rgba(255,255,255,0.85); border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; box-shadow: 0 1px 4px rgba(0,0,0,0.12); transition: opacity 0.15s; }
+  .arrow-btn.hidden { opacity: 0; pointer-events: none; }
+
+  /* Hint */
+  .hint-box { background: #f0f6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #2563eb; margin-bottom: 16px; display: none; }
+  .hint-box.show { display: block; }
+  .hint-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; color: #93b4f0; }
+
+  /* Input */
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .answer-input { flex: 1; padding: 11px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; color: #111; background: #fff; }
+  .answer-input:focus { border-color: #111; }
+  .answer-input.correct { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+  .answer-input.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+  .answer-input:disabled { opacity: 0.8; }
+  .submit-btn { padding: 11px 18px; background: #111; color: #fff; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .submit-btn:hover { background: #333; }
+  .submit-btn:disabled { background: #ccc; cursor: default; }
+
+  /* Autocomplete */
+  .autocomplete-list { position: relative; z-index: 10; margin-top: -6px; margin-bottom: 10px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+  .autocomplete-list.show { display: block; }
+  .autocomplete-item { padding: 9px 14px; font-size: 13px; cursor: pointer; transition: background 0.1s; color: #333; }
+  .autocomplete-item:hover, .autocomplete-item.highlighted { background: #f5f5f5; }
+
+  /* Feedback */
+  .feedback { font-size: 13px; font-weight: 500; min-height: 18px; margin-bottom: 14px; }
+  .feedback.correct { color: #16a34a; }
+  .feedback.wrong { color: #dc2626; }
+
+  /* Bottom row */
+  .bottom-row { display: flex; gap: 8px; align-items: center; }
+  .hint-btn { background: #fff; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #555; padding: 9px 14px; cursor: pointer; transition: all 0.15s; }
+  .hint-btn:hover { border-color: #aaa; color: #111; }
+  .hint-btn:disabled { opacity: 0.4; cursor: default; }
+  .skip-btn { background: #fff; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #555; padding: 9px 14px; cursor: pointer; transition: all 0.15s; }
+  .skip-btn:hover { border-color: #aaa; color: #111; }
+  .next-btn { background: #111; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; color: #fff; padding: 9px 16px; cursor: pointer; display: none; margin-left: auto; transition: background 0.15s; }
+  .next-btn:hover { background: #333; }
+  .next-btn.show { display: block; }
+  .streak-pill { background: #111; color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: none; }
+  .streak-pill.show { display: inline-block; }
+
+  /* Mode label */
+  .mode-label { font-size: 11px; color: #aaa; text-align: center; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Entomology ID Quiz — Science Olympiad 2026</h1>
+  <div class="score-bar">
+    <span><span class="score-num" id="sCorrect">0</span>correct</span>
+    <span><span class="score-num" id="sStreak">0</span>streak</span>
+    <span><span class="score-num" id="sTotal">0</span>total</span>
+  </div>
+</header>
+
+<div class="main">
+  <!-- Mode toggle: Order vs Family -->
+  <div class="mode-row">
+    <button class="mode-btn active" id="modeOrder" onclick="setMode('order')">Identify Order</button>
+    <button class="mode-btn" id="modeFamily" onclick="setMode('family')">Identify Family</button>
+  </div>
+  <div class="mode-label" id="modeLabel">Type the Order name (e.g. "Coleoptera")</div>
+
+  <!-- Filter chips -->
+  <div class="filter-row" id="filterRow"></div>
+
+  <!-- Photo -->
+  <div class="photo-wrap" id="photoWrap">
+    <div class="photo-loading" id="photoLoading">Image loading...</div>
+    <img id="bugImg" class="hidden" src="" alt="" onload="onImgLoad()" onerror="onImgError()">
+    <div class="photo-arrows">
+      <button class="arrow-btn hidden" id="arrowLeft" onclick="changePhoto(-1)">‹</button>
+      <button class="arrow-btn hidden" id="arrowRight" onclick="changePhoto(1)">›</button>
+    </div>
+    <div class="photo-nav-dots" id="navDots"></div>
+  </div>
+
+  <!-- Hint -->
+  <div class="hint-box" id="hintBox">
+    <div class="hint-label">Hint</div>
+    <div id="hintText"></div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-row">
+    <input class="answer-input" id="answerInput" type="text" placeholder="Type your answer…" autocomplete="off" oninput="onInput()" onkeydown="onKeyDown(event)">
+    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">Check</button>
+  </div>
+  <div class="autocomplete-list" id="acList"></div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="bottom-row">
+    <button class="hint-btn" id="hintBtn" onclick="showHint()">Hint</button>
+    <button class="skip-btn" onclick="skip()">Skip</button>
+    <span class="streak-pill" id="streakPill"></span>
+    <button class="next-btn" id="nextBtn" onclick="nextBug()">Next →</button>
+  </div>
+</div>
+
+<script>
+// Full 2026 Science Olympiad Entomology list
+// Each entry: { family, commonName, order, orderCommon, search }
+// Orders without families are listed as order-level entries
+const BUGS = [
+  // Class Entognatha
+  { family: null, commonName: "telsontails / proturans", order: "Protura", orderCommon: "Protura", search: "Protura insect" },
+  { family: null, commonName: "springtails / snow fleas", order: "Collembola", orderCommon: "Collembola", search: "Collembola springtail insect" },
+  { family: null, commonName: "diplurans", order: "Diplura", orderCommon: "Diplura", search: "Diplura insect" },
+  // Class Insecta
+  { family: null, commonName: "bristletails", order: "Archaeognatha", orderCommon: "Archaeognatha", search: "Archaeognatha bristletail insect" },
+  { family: null, commonName: "silverfish / firebrats", order: "Zygentoma", orderCommon: "Zygentoma", search: "silverfish Zygentoma insect" },
+  { family: null, commonName: "mayflies", order: "Ephemeroptera", orderCommon: "Ephemeroptera", search: "mayfly Ephemeroptera insect" },
+  // Odonata families
+  { family: "Aeshnidae", commonName: "darners", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Aeshnidae darner dragonfly" },
+  { family: "Gomphidae", commonName: "clubtails", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Gomphidae clubtail dragonfly" },
+  { family: "Libellulidae", commonName: "skimmers", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Libellulidae skimmer dragonfly" },
+  { family: "Lestidae", commonName: "spread-wing damselflies", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Lestidae spread wing damselfly" },
+  { family: "Coenagrionidae", commonName: "narrow-winged damselflies", order: "Odonata", orderCommon: "dragonflies & damselflies", search: "Coenagrionidae damselfly blue" },
+  // Blattodea
+  { family: "Blattidae", commonName: "cockroaches", order: "Blattodea", orderCommon: "cockroaches & termites", search: "Blattidae cockroach" },
+  { family: "Termitidae", commonName: "termites", order: "Blattodea", orderCommon: "cockroaches & termites", search: "Termitidae termite" },
+  // Mantodea
+  { family: null, commonName: "mantids / praying mantis", order: "Mantodea", orderCommon: "Mantodea", search: "praying mantis Mantodea" },
+  // Notoptera
+  { family: null, commonName: "ice crawlers / rock crawlers", order: "Notoptera", orderCommon: "Notoptera", search: "Grylloblatta ice crawler insect" },
+  // Dermaptera
+  { family: null, commonName: "earwigs", order: "Dermaptera", orderCommon: "Dermaptera", search: "earwig Dermaptera insect" },
+  // Plecoptera
+  { family: null, commonName: "stoneflies", order: "Plecoptera", orderCommon: "Plecoptera", search: "stonefly Plecoptera insect" },
+  // Orthoptera families
+  { family: "Tetrigidae", commonName: "pygmy grasshoppers", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Tetrigidae pygmy grasshopper" },
+  { family: "Acrididae", commonName: "short-horned grasshoppers / locusts", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Acrididae grasshopper locust" },
+  { family: "Tettigoniidae", commonName: "katydids", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Tettigoniidae katydid green" },
+  { family: "Gryllacrididae", commonName: "camel crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllacrididae camel cricket" },
+  { family: "Gryllidae", commonName: "crickets / tree crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllidae cricket insect" },
+  { family: "Gryllotalpidae", commonName: "mole crickets", order: "Orthoptera", orderCommon: "crickets & grasshoppers", search: "Gryllotalpidae mole cricket" },
+  // Phasmatodea
+  { family: null, commonName: "walking sticks", order: "Phasmatodea", orderCommon: "Phasmatodea", search: "walkingstick Phasmatodea insect" },
+  // Psocoptera / Psocodea
+  { family: null, commonName: "booklice / barklice", order: "Psocoptera", orderCommon: "Psocoptera", search: "booklice barklice Psocoptera" },
+  // Embiptera
+  { family: null, commonName: "webspinners", order: "Embioptera", orderCommon: "Embioptera", search: "webspinner Embioptera insect" },
+  // Hemiptera families
+  { family: "Corixidae", commonName: "water boatmen", order: "Hemiptera", orderCommon: "true bugs", search: "Corixidae water boatmen bug" },
+  { family: "Notonectidae", commonName: "backswimmers", order: "Hemiptera", orderCommon: "true bugs", search: "Notonectidae backswimmer bug" },
+  { family: "Belostomatidae", commonName: "giant water bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Belostomatidae giant water bug" },
+  { family: "Nepidae", commonName: "waterscorpions", order: "Hemiptera", orderCommon: "true bugs", search: "Nepidae waterscorpion bug" },
+  { family: "Gelastocoridae", commonName: "toad bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Gelastocoridae toad bug" },
+  { family: "Gerridae", commonName: "water striders", order: "Hemiptera", orderCommon: "true bugs", search: "Gerridae water strider" },
+  { family: "Cimicidae", commonName: "bed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Cimicidae bed bug insect" },
+  { family: "Miridae", commonName: "plant bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Miridae plant bug insect" },
+  { family: "Reduviidae", commonName: "assassin bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Reduviidae assassin bug" },
+  { family: "Phymatidae", commonName: "ambush bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Phymatidae ambush bug" },
+  { family: "Tingidae", commonName: "lace bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Tingidae lace bug" },
+  { family: "Lygaeidae", commonName: "seed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Lygaeidae seed bug" },
+  { family: "Coreidae", commonName: "leaf-footed bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Coreidae leaf footed bug" },
+  { family: "Pentatomidae", commonName: "stink bugs", order: "Hemiptera", orderCommon: "true bugs", search: "Pentatomidae stink bug" },
+  { family: "Cicadidae", commonName: "cicadas", order: "Hemiptera", orderCommon: "true bugs", search: "Cicadidae cicada insect" },
+  { family: "Membracidae", commonName: "treehoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Membracidae treehopper insect" },
+  { family: "Cercopidae", commonName: "froghoppers / spittlebugs", order: "Hemiptera", orderCommon: "true bugs", search: "Cercopidae froghopper spittlebug" },
+  { family: "Cicadellidae", commonName: "leafhoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Cicadellidae leafhopper insect" },
+  { family: "Fulgoridae", commonName: "fulgorid planthoppers", order: "Hemiptera", orderCommon: "true bugs", search: "Fulgoridae planthopper insect" },
+  { family: "Aphididae", commonName: "aphids", order: "Hemiptera", orderCommon: "true bugs", search: "Aphididae aphid insect" },
+  { family: "Dactylopiidae", commonName: "scale insects / cochineal", order: "Hemiptera", orderCommon: "true bugs", search: "Dactylopiidae scale insect cochineal" },
+  // Thysanoptera
+  { family: null, commonName: "thrips", order: "Thysanoptera", orderCommon: "Thysanoptera", search: "thrips Thysanoptera insect" },
+  // Megaloptera
+  { family: "Corydalidae", commonName: "dobsonflies / hellgrammites", order: "Megaloptera", orderCommon: "dobsonflies", search: "Corydalidae dobsonfly hellgrammite" },
+  { family: "Sialidae", commonName: "alderflies", order: "Megaloptera", orderCommon: "dobsonflies", search: "Sialidae alderfly insect" },
+  // Neuroptera
+  { family: "Chrysopidae", commonName: "green lacewings", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Chrysopidae green lacewing" },
+  { family: "Myrmeleontidae", commonName: "antlions", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Myrmeleontidae antlion insect" },
+  { family: "Mantispidae", commonName: "mantisflies", order: "Neuroptera", orderCommon: "lacewings & antlions", search: "Mantispidae mantisfly insect" },
+  // Coleoptera families
+  { family: "Carabidae", commonName: "ground beetles", order: "Coleoptera", orderCommon: "beetles", search: "Carabidae ground beetle" },
+  { family: "Dytiscidae", commonName: "predaceous diving beetles", order: "Coleoptera", orderCommon: "beetles", search: "Dytiscidae diving beetle" },
+  { family: "Gyrinidae", commonName: "whirligig beetles", order: "Coleoptera", orderCommon: "beetles", search: "Gyrinidae whirligig beetle" },
+  { family: "Hydrophilidae", commonName: "water scavenger beetles", order: "Coleoptera", orderCommon: "beetles", search: "Hydrophilidae water scavenger beetle" },
+  { family: "Silphidae", commonName: "carrion beetles", order: "Coleoptera", orderCommon: "beetles", search: "Silphidae carrion beetle" },
+  { family: "Staphylinidae", commonName: "rove beetles", order: "Coleoptera", orderCommon: "beetles", search: "Staphylinidae rove beetle" },
+  { family: "Lucanidae", commonName: "stag beetles", order: "Coleoptera", orderCommon: "beetles", search: "Lucanidae stag beetle" },
+  { family: "Scarabaeidae", commonName: "scarab beetles / dung beetles", order: "Coleoptera", orderCommon: "beetles", search: "Scarabaeidae scarab beetle" },
+  { family: "Buprestidae", commonName: "metallic wood-boring beetles / jewel beetles", order: "Coleoptera", orderCommon: "beetles", search: "Buprestidae jewel beetle metallic" },
+  { family: "Elateridae", commonName: "click beetles", order: "Coleoptera", orderCommon: "beetles", search: "Elateridae click beetle" },
+  { family: "Cantharidae", commonName: "soldier beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cantharidae soldier beetle" },
+  { family: "Lampyridae", commonName: "fireflies / lightning bugs", order: "Coleoptera", orderCommon: "beetles", search: "Lampyridae firefly lightning bug" },
+  { family: "Dermestidae", commonName: "dermestid / carpet beetles", order: "Coleoptera", orderCommon: "beetles", search: "Dermestidae carpet beetle" },
+  { family: "Coccinellidae", commonName: "lady beetles / ladybugs", order: "Coleoptera", orderCommon: "beetles", search: "Coccinellidae ladybug lady beetle" },
+  { family: "Meloidae", commonName: "blister beetles", order: "Coleoptera", orderCommon: "beetles", search: "Meloidae blister beetle" },
+  { family: "Cerambycidae", commonName: "longhorn beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cerambycidae longhorn beetle" },
+  { family: "Chrysomelidae", commonName: "leaf beetles", order: "Coleoptera", orderCommon: "beetles", search: "Chrysomelidae leaf beetle colorful" },
+  { family: "Curculionidae", commonName: "weevils / snout beetles", order: "Coleoptera", orderCommon: "beetles", search: "Curculionidae weevil snout beetle" },
+  { family: "Tenebrionidae", commonName: "darkling beetles", order: "Coleoptera", orderCommon: "beetles", search: "Tenebrionidae darkling beetle" },
+  { family: "Cleridae", commonName: "checkered beetles", order: "Coleoptera", orderCommon: "beetles", search: "Cleridae checkered beetle colorful" },
+  // Mecoptera
+  { family: null, commonName: "scorpionflies", order: "Mecoptera", orderCommon: "Mecoptera", search: "scorpionfly Mecoptera insect" },
+  // Raphidioptera
+  { family: null, commonName: "snakeflies", order: "Raphidioptera", orderCommon: "Raphidioptera", search: "snakefly Raphidioptera insect" },
+  // Siphonaptera
+  { family: null, commonName: "fleas", order: "Siphonaptera", orderCommon: "Siphonaptera", search: "flea Siphonaptera insect microscope" },
+  // Diptera families
+  { family: "Tipulidae", commonName: "crane flies", order: "Diptera", orderCommon: "true flies", search: "Tipulidae crane fly" },
+  { family: "Culicidae", commonName: "mosquitoes", order: "Diptera", orderCommon: "true flies", search: "Culicidae mosquito insect" },
+  { family: "Chironomidae", commonName: "midges (non-biting)", order: "Diptera", orderCommon: "true flies", search: "Chironomidae midge insect" },
+  { family: "Simuliidae", commonName: "black flies / buffalo gnats", order: "Diptera", orderCommon: "true flies", search: "Simuliidae black fly buffalo gnat" },
+  { family: "Tabanidae", commonName: "horse flies / deer flies", order: "Diptera", orderCommon: "true flies", search: "Tabanidae horse fly deer fly" },
+  { family: "Asilidae", commonName: "robber flies", order: "Diptera", orderCommon: "true flies", search: "Asilidae robber fly" },
+  { family: "Syrphidae", commonName: "hover flies / flower flies", order: "Diptera", orderCommon: "true flies", search: "Syrphidae hoverfly flower fly" },
+  { family: "Tephritidae", commonName: "fruit flies (large)", order: "Diptera", orderCommon: "true flies", search: "Tephritidae fruit fly" },
+  { family: "Muscidae", commonName: "house flies", order: "Diptera", orderCommon: "true flies", search: "Muscidae house fly" },
+  { family: "Calliphoridae", commonName: "blow flies / bottle flies", order: "Diptera", orderCommon: "true flies", search: "Calliphoridae blow fly bottle fly" },
+  { family: "Tachinidae", commonName: "tachinid flies", order: "Diptera", orderCommon: "true flies", search: "Tachinidae tachinid fly bristly" },
+  { family: "Sarcophagidae", commonName: "flesh flies", order: "Diptera", orderCommon: "true flies", search: "Sarcophagidae flesh fly" },
+  // Trichoptera
+  { family: null, commonName: "caddisflies", order: "Trichoptera", orderCommon: "Trichoptera", search: "caddisfly Trichoptera adult" },
+  // Lepidoptera families
+  { family: "Papilionidae", commonName: "swallowtail butterflies", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Papilionidae swallowtail butterfly" },
+  { family: "Pieridae", commonName: "whites & sulphurs", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Pieridae white sulphur butterfly" },
+  { family: "Lycaenidae", commonName: "blues & coppers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Lycaenidae blue copper butterfly" },
+  { family: "Nymphalidae", commonName: "brush-footed butterflies", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Nymphalidae brush footed butterfly" },
+  { family: "Hesperiidae", commonName: "skippers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Hesperiidae skipper butterfly" },
+  { family: "Sphingidae", commonName: "hawk moths / sphinx moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Sphingidae hawk moth sphinx" },
+  { family: "Saturniidae", commonName: "giant silk moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Saturniidae giant silk moth" },
+  { family: "Noctuidae", commonName: "owlet moths / noctuid moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Noctuidae owlet moth noctuid" },
+  { family: "Geometridae", commonName: "inchworm moths / geometrid moths", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Geometridae geometer moth" },
+  { family: "Tortricidae", commonName: "tortrix moths / leafrollers", order: "Lepidoptera", orderCommon: "butterflies & moths", search: "Tortricidae tortrix moth leafroller" },
+  // Hymenoptera families
+  { family: "Tenthredinidae", commonName: "sawflies", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Tenthredinidae sawfly insect" },
+  { family: "Ichneumonidae", commonName: "ichneumon wasps / parasitoid wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Ichneumonidae ichneumon wasp" },
+  { family: "Cynipidae", commonName: "gall wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Cynipidae gall wasp insect" },
+  { family: "Vespidae", commonName: "yellowjackets / hornets / paper wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Vespidae yellowjacket hornet paper wasp" },
+  { family: "Pompilidae", commonName: "spider wasps", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Pompilidae spider wasp" },
+  { family: "Sphecidae", commonName: "digger wasps / mud daubers", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Sphecidae digger wasp mud dauber" },
+  { family: "Apidae", commonName: "bees (honey, bumble, carpenter)", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Apidae honey bee bumble bee" },
+  { family: "Halictidae", commonName: "sweat bees", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Halictidae sweat bee metallic green" },
+  { family: "Megachilidae", commonName: "leafcutter / mason bees", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Megachilidae leafcutter mason bee" },
+  { family: "Formicidae", commonName: "ants", order: "Hymenoptera", orderCommon: "ants, bees & wasps", search: "Formicidae ant insect" },
+  // Non-insect: Acari
+  { family: "Ixodidae", commonName: "hard ticks", order: "Acari", orderCommon: "ticks (non-insect)", search: "Ixodidae hard tick arachnid" },
+];
+
+const ORDERS = [...new Set(BUGS.map(b => b.order))];
+const ORDER_FILTER_GROUPS = ['All','Odonata','Orthoptera','Hemiptera','Coleoptera','Diptera','Lepidoptera','Hymenoptera','Other'];
+
+let mode = 'order'; // 'order' or 'family'
+let selectedGroup = 'All';
+let current = null;
+let photos = [];
+let photoIdx = 0;
+let answered = false;
+let correct = 0;
+let streak = 0;
+let total = 0;
+let used = [];
+let acHighlight = -1;
+
+// Build filters
+const filterRow = document.getElementById('filterRow');
+ORDER_FILTER_GROUPS.forEach(g => {
+  const c = document.createElement('button');
+  c.className = 'chip' + (g === 'All' ? ' active' : '');
+  c.textContent = g;
+  c.onclick = () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    selectedGroup = g;
+    used = [];
+    nextBug();
+  };
+  filterRow.appendChild(c);
+});
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('modeOrder').className = 'mode-btn' + (m === 'order' ? ' active' : '');
+  document.getElementById('modeFamily').className = 'mode-btn' + (m === 'family' ? ' active' : '');
+  document.getElementById('modeLabel').textContent = m === 'order'
+    ? 'Type the Order name (e.g. "Coleoptera")'
+    : 'Type the Family name (e.g. "Coccinellidae") or common name';
+  used = [];
+  nextBug();
+}
+
+function getPool() {
+  let pool = BUGS;
+  if (mode === 'family') pool = BUGS.filter(b => b.family !== null);
+  if (selectedGroup === 'All') return pool;
+  if (selectedGroup === 'Other') {
+    const main = ['Odonata','Orthoptera','Hemiptera','Coleoptera','Diptera','Lepidoptera','Hymenoptera'];
+    return pool.filter(b => !main.includes(b.order));
+  }
+  return pool.filter(b => b.order === selectedGroup);
+}
+
+function getAnswerKey() {
+  if (mode === 'order') return current.order;
+  return current.family;
+}
+
+function getHintText() {
+  if (mode === 'order') return `Common name: ${current.commonName}`;
+  return `Order: ${current.order} (${current.orderCommon}) — Common name: ${current.commonName}`;
+}
+
+function normalize(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+function getACSuggestions(val) {
+  if (mode === 'order') {
+    return ORDERS.filter(o => o.toLowerCase().startsWith(val.toLowerCase())).slice(0, 6);
+  } else {
+    const families = [...new Set(BUGS.filter(b => b.family).map(b => b.family))];
+    const byFamily = families.filter(f => f.toLowerCase().startsWith(val.toLowerCase()));
+    const byCommon = BUGS.filter(b => b.family && b.commonName.toLowerCase().includes(val.toLowerCase())).map(b => b.family);
+    return [...new Set([...byFamily, ...byCommon])].slice(0, 6);
+  }
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+async function nextBug() {
+  answered = false;
+  document.getElementById('hintBox').classList.remove('show');
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('hintBtn').disabled = false;
+  const inp = document.getElementById('answerInput');
+  inp.value = '';
+  inp.className = 'answer-input';
+  inp.disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+  hideAC();
+
+  const pool = getPool();
+  if (!pool.length) return;
+  let avail = pool.filter(b => {
+    const key = mode === 'order' ? b.order : b.family;
+    return !used.includes(key);
+  });
+  if (avail.length === 0) { used = []; avail = pool; }
+  current = avail[Math.floor(Math.random() * avail.length)];
+  used.push(mode === 'order' ? current.order : current.family);
+
+  // Reset photo
+  photos = [];
+  photoIdx = 0;
+  const img = document.getElementById('bugImg');
+  img.className = 'hidden';
+  img.src = '';
+  document.getElementById('photoLoading').textContent = 'Image loading...';
+  document.getElementById('photoLoading').style.display = 'flex';
+  document.getElementById('navDots').innerHTML = '';
+  document.getElementById('arrowLeft').classList.add('hidden');
+  document.getElementById('arrowRight').classList.add('hidden');
+
+  const fetched = await getWikimediaPhotos(current.search, 4);
+  photos = fetched;
+  if (photos.length > 0) { showPhoto(0); buildDots(); }
+
+  inp.focus();
+}
+
+function showPhoto(idx) {
+  const img = document.getElementById('bugImg');
+  img.className = 'hidden';
+  img.src = photos[idx];
+  photoIdx = idx;
+  updateArrows();
+  updateDots();
+}
+
+function buildDots() {
+  const dots = document.getElementById('navDots');
+  dots.innerHTML = '';
+  if (photos.length <= 1) return;
+  photos.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => showPhoto(i);
+    dots.appendChild(d);
+  });
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === photoIdx ? ' active' : '');
+  });
+}
+
+function updateArrows() {
+  document.getElementById('arrowLeft').className = 'arrow-btn' + (photoIdx > 0 ? '' : ' hidden');
+  document.getElementById('arrowRight').className = 'arrow-btn' + (photoIdx < photos.length - 1 ? '' : ' hidden');
+}
+
+function changePhoto(dir) {
+  const ni = photoIdx + dir;
+  if (ni >= 0 && ni < photos.length) showPhoto(ni);
+}
+
+function onImgLoad() {
+  document.getElementById('bugImg').className = 'visible';
+  document.getElementById('photoLoading').style.display = 'none';
+}
+
+function onImgError() {
+  photoIdx++;
+  if (photoIdx < photos.length) showPhoto(photoIdx);
+  else { document.getElementById('photoLoading').textContent = 'Image loading...'; }
+}
+
+function onInput() {
+  const val = document.getElementById('answerInput').value.trim();
+  if (!val) { hideAC(); return; }
+  const matches = getACSuggestions(val);
+  if (!matches.length) { hideAC(); return; }
+  const list = document.getElementById('acList');
+  list.innerHTML = '';
+  acHighlight = -1;
+  matches.forEach(m => {
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    item.textContent = m;
+    item.onmousedown = () => { document.getElementById('answerInput').value = m; hideAC(); submitAnswer(); };
+    list.appendChild(item);
+  });
+  list.classList.add('show');
+}
+
+function hideAC() {
+  document.getElementById('acList').classList.remove('show');
+  acHighlight = -1;
+}
+
+function onKeyDown(e) {
+  const list = document.getElementById('acList');
+  const items = list.querySelectorAll('.autocomplete-item');
+  if (e.key === 'ArrowDown') { e.preventDefault(); acHighlight = Math.min(acHighlight+1, items.length-1); items.forEach((x,i)=>x.className='autocomplete-item'+(i===acHighlight?' highlighted':'')); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); acHighlight = Math.max(acHighlight-1, -1); items.forEach((x,i)=>x.className='autocomplete-item'+(i===acHighlight?' highlighted':'')); }
+  else if (e.key === 'Enter') {
+    if (acHighlight >= 0 && items[acHighlight]) { document.getElementById('answerInput').value = items[acHighlight].textContent; hideAC(); }
+    submitAnswer();
+  } else if (e.key === 'Escape') hideAC();
+}
+
+function submitAnswer() {
+  if (answered) return;
+  const inp = document.getElementById('answerInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  hideAC();
+  answered = true;
+  total++;
+  document.getElementById('sTotal').textContent = total;
+  inp.disabled = true;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('hintBtn').disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+
+  const answer = getAnswerKey();
+  const isCorrect = normalize(val) === normalize(answer) ||
+    (mode === 'family' && normalize(val) === normalize(current.commonName));
+
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    inp.className = 'answer-input correct';
+    correct++; streak++;
+    document.getElementById('sCorrect').textContent = correct;
+    document.getElementById('sStreak').textContent = streak;
+    fb.textContent = '✓ Correct!';
+    fb.className = 'feedback correct';
+    if (streak >= 3) { document.getElementById('streakPill').textContent = `🔥 ${streak} streak`; document.getElementById('streakPill').classList.add('show'); }
+  } else {
+    inp.className = 'answer-input wrong';
+    streak = 0;
+    document.getElementById('sStreak').textContent = 0;
+    document.getElementById('streakPill').classList.remove('show');
+    const displayAnswer = mode === 'family' ? `${answer} (${current.commonName})` : `${answer} (${current.orderCommon})`;
+    fb.textContent = `✗ Answer: ${displayAnswer}`;
+    fb.className = 'feedback wrong';
+  }
+}
+
+function showHint() {
+  document.getElementById('hintBox').classList.add('show');
+  document.getElementById('hintText').textContent = getHintText();
+  document.getElementById('hintBtn').disabled = true;
+}
+
+function skip() { nextBug(); }
+
+async function getWikimediaPhotos(search, count) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(search)}&srnamespace=6&srlimit=${count+5}&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const titles = (data.query?.search||[]).map(r=>r.title).filter(t=>/\.(jpg|jpeg|png)/i.test(t));
+    const urls = [];
+    for (const title of titles.slice(0, count+2)) {
+      const u = await getImgUrl(title);
+      if (u) urls.push(u);
+      if (urls.length >= count) break;
+    }
+    return urls;
+  } catch { return []; }
+}
+
+async function getImgUrl(title) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=700&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = Object.values(data.query?.pages||{});
+    const info = pages[0]?.imageinfo?.[0];
+    return info?.thumburl || info?.url || null;
+  } catch { return null; }
+}
+
+nextBug();
 </script>
 </body>
 </html>
