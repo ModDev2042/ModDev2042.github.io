@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LaTeX Quick Convert</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F9FB;
+    --grid:#DCE6F1;
+    --ink:#1C3A5F;
+    --pencil:#5B6B7D;
+    --red:#C0463C;
+    --green:#3D7A5C;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:36px 20px 60px;
+  }
+  .wrap{max-width:920px; margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:38px;
+    margin:0 0 8px;
+    line-height:1.1;
+  }
+  .sub{color:var(--pencil); font-size:15px; max-width:56ch; margin:0;}
+
+  .panel{
+    background:var(--card);
+    border:1px solid var(--grid);
+    border-radius:10px;
+    box-shadow:0 1px 2px rgba(28,58,95,.04);
+  }
+
+  .transform{
+    display:grid;
+    grid-template-columns:1fr 44px 1fr;
+    align-items:stretch;
+    gap:0;
+    margin-top:8px;
+  }
+  @media (max-width:720px){
+    .transform{grid-template-columns:1fr;}
+    .arrow-col{
+      transform:rotate(90deg);
+      height:40px;
+      margin:6px auto;
+    }
+  }
+
+  .field{padding:18px;}
+  .field-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--pencil);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  textarea{
+    width:100%;
+    min-height:150px;
+    resize:vertical;
+    border:1px solid var(--grid);
+    border-radius:6px;
+    background:#FCFDFE;
+    padding:12px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink);
+    line-height:1.5;
+  }
+  textarea:focus{outline:2px solid #B9CFE6; outline-offset:1px;}
+
+  .output-code{
+    width:100%;
+    min-height:150px;
+    border:1px solid var(--grid);
+    border-radius:6px;
+    background:#FCFDFE;
+    padding:12px 14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    color:var(--ink);
+    line-height:1.5;
+    white-space:pre-wrap;
+    word-break:break-word;
+    overflow:auto;
+  }
+
+  .arrow-col{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--red);
+  }
+  .arrow-col svg{width:26px; height:26px;}
+
+  .copy-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    background:none;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    border-radius:20px;
+    padding:4px 12px;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .copy-btn:hover{background:var(--ink); color:#fff;}
+  .copy-btn.copied{
+    border-color:var(--green);
+    color:#fff;
+    background:var(--green);
+  }
+
+  .preview-panel{
+    margin-top:16px;
+    padding:22px 18px;
+    min-height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:19px;
+    overflow-x:auto;
+  }
+  .preview-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--pencil);
+    padding:14px 18px 0;
+  }
+  .katex-error{color:var(--red); font-family:'IBM Plex Mono', monospace; font-size:13px;}
+
+  details{margin-top:22px;}
+  summary{
+    cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--pencil);
+    padding:4px 0;
+  }
+  .legend-group{margin-top:16px;}
+  .legend-group h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .legend{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+    gap:5px 22px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .legend span.op{color:var(--red);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">plain text → LaTeX</p>
+    <h1>LaTeX Quick Convert</h1>
+    <p class="sub">Type ordinary notation — <code>(-inf, 5] U [7, inf)</code>, <code>x^2 + sqrt(y)</code>, <code>a -&gt; b &lt;-&gt; c</code> — get LaTeX back, rendered and ready to copy. Every symbol has a plain-text abbreviation, see below.</p>
+  </header>
+
+  <div class="panel">
+    <div class="transform">
+      <div class="field">
+        <div class="field-label"><span>Plain text</span></div>
+        <textarea id="input" placeholder="(-inf, 5] U [7, inf)&#10;x^2 + sqrt(y) &gt;= 3&#10;alpha + beta != gamma">(-inf, 5] U [7, inf)</textarea>
+      </div>
+      <div class="arrow-col">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M2 12h18M14 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <span>LaTeX</span>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+        <div class="output-code" id="output"></div>
+      </div>
+    </div>
+
+    <div class="preview-label">Rendered</div>
+    <div class="preview-panel" id="preview"></div>
+  </div>
+
+  <details>
+    <summary>Supported shorthand — every symbol has a text abbreviation</summary>
+    <div id="legendRoot"></div>
+  </details>
+
+</div>
+
+<script>
+// ---- symbolic (non-word) operators, longest-match first ----
+const SYMBOLIC_OPS = [
+  ['<=>',  ' \\Leftrightarrow '],
+  ['<->',  ' \\leftrightarrow '],
+  ['|->',  ' \\mapsto '],
+  ['=>',   ' \\Rightarrow '],
+  ['->',   ' \\rightarrow '],
+  ['<-',   ' \\leftarrow '],
+  ['<=',   ' \\leq '],
+  ['>=',   ' \\geq '],
+  ['!=',   ' \\neq '],
+  ['<>',   ' \\neq '],
+  ['~=',   ' \\approx '],
+  ['+/-',  ' \\pm '],
+  ['+-',   ' \\pm '],
+  ['-+',   ' \\mp '],
+];
+
+// ---- word-based symbol dictionary, grouped for the legend ----
+const LEGEND = {
+  "Arrows": [
+    ["rightarrow","\\rightarrow"], ["leftarrow","\\leftarrow"], ["leftrightarrow","\\leftrightarrow"],
+    ["Rightarrow","\\Rightarrow"], ["Leftarrow","\\Leftarrow"], ["Leftrightarrow","\\Leftrightarrow"],
+    ["uparrow","\\uparrow"], ["downarrow","\\downarrow"], ["updownarrow","\\updownarrow"],
+    ["mapsto","\\mapsto"], ["hookrightarrow","\\hookrightarrow"], ["hookleftarrow","\\hookleftarrow"],
+    ["longrightarrow","\\longrightarrow"], ["longleftarrow","\\longleftarrow"],
+    ["implies","\\Rightarrow"], ["iff","\\Leftrightarrow"],
+  ],
+  "Relations": [
+    ["leq","\\leq"], ["geq","\\geq"], ["neq","\\neq"], ["ll","\\ll"], ["gg","\\gg"],
+    ["sim","\\sim"], ["simeq","\\simeq"], ["cong","\\cong"], ["equiv","\\equiv"],
+    ["approx","\\approx"], ["propto","\\propto"], ["perp","\\perp"], ["parallel","\\parallel"],
+    ["angle","\\angle"],
+  ],
+  "Set & logic": [
+    ["union","\\cup"], ["cup","\\cup"], ["intersect","\\cap"], ["intersection","\\cap"], ["cap","\\cap"],
+    ["subset","\\subset"], ["subseteq","\\subseteq"], ["supset","\\supset"], ["supseteq","\\supseteq"],
+    ["in","\\in"], ["notin","\\notin"], ["emptyset","\\emptyset"], ["empty","\\emptyset"],
+    ["forall","\\forall"], ["exists","\\exists"], ["nexists","\\nexists"],
+    ["land","\\wedge"], ["wedge","\\wedge"], ["lor","\\vee"], ["vee","\\vee"], ["neg","\\neg"],
+    ["therefore","\\therefore"], ["because","\\because"],
+  ],
+  "Operators & functions": [
+    ["sum","\\sum"], ["prod","\\prod"], ["product","\\prod"], ["int","\\int"], ["integral","\\int"],
+    ["oint","\\oint"], ["lim","\\lim"], ["max","\\max"], ["min","\\min"], ["sup","\\sup"], ["gcd","\\gcd"],
+    ["det","\\det"], ["ln","\\ln"], ["log","\\log"], ["exp","\\exp"],
+    ["sin","\\sin"], ["cos","\\cos"], ["tan","\\tan"], ["sec","\\sec"], ["csc","\\csc"], ["cot","\\cot"],
+    ["sinh","\\sinh"], ["cosh","\\cosh"], ["tanh","\\tanh"],
+    ["arcsin","\\arcsin"], ["arccos","\\arccos"], ["arctan","\\arctan"],
+  ],
+  "Greek letters": [
+    ["alpha","\\alpha"], ["beta","\\beta"], ["gamma","\\gamma"], ["delta","\\delta"], ["epsilon","\\epsilon"],
+    ["varepsilon","\\varepsilon"], ["zeta","\\zeta"], ["eta","\\eta"], ["theta","\\theta"], ["vartheta","\\vartheta"],
+    ["iota","\\iota"], ["kappa","\\kappa"], ["lambda","\\lambda"], ["mu","\\mu"], ["nu","\\nu"], ["xi","\\xi"],
+    ["omicron","\\omicron"], ["pi","\\pi"], ["varpi","\\varpi"], ["rho","\\rho"], ["varrho","\\varrho"],
+    ["sigma","\\sigma"], ["varsigma","\\varsigma"], ["tau","\\tau"], ["upsilon","\\upsilon"],
+    ["phi","\\phi"], ["varphi","\\varphi"], ["chi","\\chi"], ["psi","\\psi"], ["omega","\\omega"],
+    ["Gamma","\\Gamma"], ["Delta","\\Delta"], ["Theta","\\Theta"], ["Lambda","\\Lambda"], ["Xi","\\Xi"],
+    ["Pi","\\Pi"], ["Sigma","\\Sigma"], ["Upsilon","\\Upsilon"], ["Phi","\\Phi"], ["Psi","\\Psi"], ["Omega","\\Omega"],
+  ],
+  "Misc symbols": [
+    ["infty","\\infty"], ["infinity","\\infty"], ["inf","\\infty"],
+    ["partial","\\partial"], ["nabla","\\nabla"], ["hbar","\\hbar"], ["ell","\\ell"], ["aleph","\\aleph"],
+    ["wp","\\wp"], ["Re","\\Re"], ["Im","\\Im"], ["star","\\star"], ["ast","\\ast"], ["bullet","\\bullet"],
+    ["circ","\\circ"], ["deg","^\\circ"], ["ldots","\\ldots"], ["dots","\\ldots"], ["cdots","\\cdots"],
+    ["vdots","\\vdots"], ["ddots","\\ddots"], ["pm","\\pm"], ["mp","\\mp"], ["times","\\times"], ["div","\\div"],
+    ["cdot","\\cdot"],
+  ],
+};
+
+// flatten to ordered [regex, replacement] list (longer words first to avoid partial shadowing)
+const WORD_OPS = Object.values(LEGEND).flat()
+  .sort((a, b) => b[0].length - a[0].length)
+  .map(([word, cmd]) => [new RegExp('\\b' + word + '\\b', 'g'), '\\' + cmd.replace(/^\\/, '')]);
+
+function convert(src){
+  let s = src;
+
+  // symbolic operators first (longest first, already ordered above)
+  SYMBOLIC_OPS.forEach(([lit, rep]) => {
+    s = s.split(lit).join(rep);
+  });
+
+  // sqrt / cbrt with parens
+  s = s.replace(/cbrt\(([^()]+)\)/g, '\\sqrt[3]{$1}');
+  s = s.replace(/sqrt\(([^()]+)\)/g, '\\sqrt{$1}');
+
+  // simple fractions: token/token (letters, digits, dots only, no spaces)
+  s = s.replace(/\b([\w.]+)\/([\w.]+)\b/g, '\\frac{$1}{$2}');
+
+  // exponent / subscript with parenthesized group
+  s = s.replace(/\^\(([^()]+)\)/g, '^{$1}');
+  s = s.replace(/_\(([^()]+)\)/g, '_{$1}');
+  // exponent / subscript with single token
+  s = s.replace(/\^([\w.-]+)/g, '^{$1}');
+  s = s.replace(/_([\w.-]+)/g, '_{$1}');
+
+  // standalone capital U / N flanked by spaces read as cup / cap
+  s = s.replace(/(?<=\s)U(?=\s)/g, '\\cup');
+  s = s.replace(/(?<=\s)N(?=\s)/g, '\\cap');
+
+  // multiplication dot
+  s = s.replace(/\*/g, ' \\cdot ');
+
+  // percent
+  s = s.replace(/%/g, '\\%');
+  // degree symbol (word "deg" handled in WORD_OPS)
+  s = s.replace(/°/g, '^\\circ');
+
+  // full word-based dictionary (arrows, relations, set/logic, functions, greek, misc)
+  WORD_OPS.forEach(([re, rep]) => { s = s.replace(re, rep); });
+
+  // tidy whitespace
+  s = s.replace(/[ \t]+/g, ' ').trim();
+
+  return s;
+}
+
+function buildLegend(){
+  const root = document.getElementById('legendRoot');
+  Object.entries(LEGEND).forEach(([group, entries]) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'legend-group';
+    const h = document.createElement('h3');
+    h.textContent = group;
+    wrap.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'legend';
+    entries.forEach(([word, cmd]) => {
+      const row = document.createElement('div');
+      row.innerHTML = `<span class="op">${word}</span> → ${cmd}`;
+      grid.appendChild(row);
+    });
+    wrap.appendChild(grid);
+    root.appendChild(wrap);
+  });
+  // symbolic ops as their own group
+  const wrap = document.createElement('div');
+  wrap.className = 'legend-group';
+  const h = document.createElement('h3');
+  h.textContent = 'Symbols & punctuation';
+  wrap.appendChild(h);
+  const grid = document.createElement('div');
+  grid.className = 'legend';
+  const symbolLegend = [
+    ["<=>", "\\Leftrightarrow"], ["<->", "\\leftrightarrow"], ["|->", "\\mapsto"],
+    ["=>", "\\Rightarrow"], ["->", "\\rightarrow"], ["<-", "\\leftarrow"],
+    ["<=", "\\leq"], [">=", "\\geq"], ["!=", "\\neq"], ["~=", "\\approx"],
+    ["+- / +/-", "\\pm"], ["-+", "\\mp"], ["*", "\\cdot"], ["a/b", "\\frac{a}{b}"],
+    ["x^2, x_1", "x^{2}, x_{1}"], ["sqrt(x), cbrt(x)", "\\sqrt{x}, \\sqrt[3]{x}"],
+    ["% ", "\\%"], ["° / deg", "^\\circ"], ["U / N (spaced)", "\\cup / \\cap"],
+  ];
+  symbolLegend.forEach(([word, cmd]) => {
+    const row = document.createElement('div');
+    row.innerHTML = `<span class="op">${word}</span> → ${cmd}`;
+    grid.appendChild(row);
+  });
+  wrap.appendChild(grid);
+  root.insertBefore(wrap, root.firstChild);
+}
+buildLegend();
+
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+const preview = document.getElementById('preview');
+const copyBtn = document.getElementById('copyBtn');
+
+function render(){
+  const latex = convert(input.value);
+  output.textContent = latex;
+  try{
+    katex.render(latex, preview, { throwOnError:false, displayMode:true });
+  }catch(e){
+    preview.innerHTML = '<span class="katex-error">Could not render preview</span>';
+  }
+}
+
+input.addEventListener('input', render);
+
+copyBtn.addEventListener('click', async () => {
+  try{
+    await navigator.clipboard.writeText(output.textContent);
+    copyBtn.textContent = 'Copied';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy';
+      copyBtn.classList.remove('copied');
+    }, 1400);
+  }catch(e){
+    const range = document.createRange();
+    range.selectNode(output);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    copyBtn.textContent = 'Copied';
+    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1400);
+  }
+});
+
+render();
+</script>
+</body>
+</html>
